@@ -1,0 +1,4 @@
+username,password,role,zodiacSign,profileImageUrl,gender
+astroUser1,password123,USER,Leo,https://example.com/image1.jpg,Male
+astroUser2,securePass,USER,Cancer,https://example.com/image2.jpg,Female
+astroUser3,test1234,USER,Virgo,,Non-Binary

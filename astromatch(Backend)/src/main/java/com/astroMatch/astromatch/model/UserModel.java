@@ -1,4 +1,5 @@
 package com.astroMatch.astromatch.model;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,13 +8,14 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
+@Table(name = "users2")
 public class UserModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Column(unique = true, nullable = false)
     private String username;
 
@@ -22,7 +24,79 @@ public class UserModel {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private Role role = Role.USER; // Valor por defecto USER
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private Integer age;
+
+    @Column(nullable = false)
+    private String gender;
+
+    @Column(nullable = false)
+    private String preferredGender;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getPreferredGender() {
+        return preferredGender;
+    }
+
+    public void setPreferredGender(String preferredGender) {
+        this.preferredGender = preferredGender;
+    }
+
+    public void setZodiacSign(String zodiacSign) {
+        this.zodiacSign = zodiacSign;
+    }
+
+    @Column(nullable = false)
+    private String profileImageUrl; // Se guardará la URL de la imagen en la BD
+
+    @Setter
+    @Column
+    private String zodiacSign;
+
+
+    public String getZodiacSign() {
+        return zodiacSign;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public Long getId() {
         return id;
@@ -30,10 +104,6 @@ public class UserModel {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public void setUsername(String username) {
