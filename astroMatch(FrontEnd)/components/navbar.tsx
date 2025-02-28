@@ -7,11 +7,13 @@ import {
   NavbarBrand,
   NavbarItem,
   NavbarMenuItem,
+  
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import LoginModal from "@/modals/login-modal";
 import { useAuthStore } from "@/store/authStore"; 
 import RegisterModal from "@/modals/Register-modal";
+import Link from "next/link";
 
 
 export const Navbar = () => {
@@ -23,6 +25,16 @@ const { openLogin, openRegister } = useAuthStore();  // Desestructurar correctam
         <NavbarBrand>
           <p className="font-bold text-inherit">AstroMatch</p>
         </NavbarBrand>
+        <NavbarItem>
+          <Link color="foreground" href="#">
+            About us
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link color="foreground" href="#">
+            Astral Card 
+          </Link>
+        </NavbarItem>
         <NavbarContent className="hidden sm:flex gap-4" justify="center"></NavbarContent>
         <NavbarContent justify="end">
           <NavbarItem className="hidden lg:flex">
