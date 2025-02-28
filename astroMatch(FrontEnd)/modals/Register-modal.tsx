@@ -1,7 +1,8 @@
-// LogiModal.tsx
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Checkbox, Link, Select, SelectItem,} from "@heroui/react";
+'use client'
+import React, { useState } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Checkbox, Link, Select, SelectItem } from "@heroui/react";
 import { useAuthStore } from "@/store/authStore";
-import { useRef, useState } from "react";
+
 export const horoscopos = [
   { key: "aries", label: "Aries" },
   { key: "taurus", label: "Taurus" },
@@ -16,135 +17,82 @@ export const horoscopos = [
   { key: "aquarius", label: "Aquarius" },
   { key: "pisces", label: "Pisces" }
 ];
+
 export const generos = [
-  {key: "male", label: "Hombre"},
-  {key: "female", label: "Mujer"},
-  
+  { key: "hombre", label: "Hombre" },
+  { key: "mujer", label: "Mujer" },
 ];
+
 export default function RegisterModal() {
-  const { isRegisterOpen, closeRegister } = useAuthStore();  // Obtener el estado 'isLoginOpen' y la función 'closeLogin'
+  const { isRegisterOpen, closeRegister } = useAuthStore();
+  const [selectedFileName, setSelectedFileName] = useState<string>("");
 
-    // Estado para los valores del formulario (se toma esto como referencia para pasar los datos a la API)
-    const [formData, setFormData] = useState({
-      username: "",
-      password: "",
-      email: "",
-      age: "",
-      gender: "",
-      preferredGender: "",
-    });
-
-    // referencia al input de tipo 'file' para subir la imagen
-    const imageRef = useRef<HTMLInputElement>(null);  // Referencia al input de tipo 'file' para subir la imagen
-
-      // Manejar cambios en los inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  
-    // Manejar el registro de usuario
-    const handleRegister = async () => {
-      if (!imageRef.current || !imageRef.current.files?.length) {
-        alert("Por favor, selecciona una imagen.");
-        return;
-      }
-  
-      const file = imageRef.current.files[0];
-  
-      const formDataToSend = new FormData();
-      formDataToSend.append("username", formData.username);
-      formDataToSend.append("password", formData.password);
-      formDataToSend.append("email", formData.email);
-      formDataToSend.append("age", formData.age);
-      formDataToSend.append("gender", formData.gender);
-      formDataToSend.append("preferredGender", formData.preferredGender);
-      formDataToSend.append("file", file);
-  
-      try {
-        const response = await fetch("http://localhost:8080/api/auth/register", {
-          method: "POST",
-          body: formDataToSend,
-        });
-  
-        const data = await response.json();
-  
-        if (!response.ok) {
-          alert(data.message || "Error al registrar el usuario");
-          return;
-        }
-  
-        // Guardar token en localStorage
-        localStorage.setItem("token", data.token);
-        alert("Usuario registrado con éxito");
-  
-        // Cerrar modal
-        closeRegister();
-      } catch (error) {
-        console.error("Error en el registro:", error);
-        alert("Hubo un problema con el registro.");
-      }
-    };
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
+    if (file) {
+      setSelectedFileName(file.name);
+    }
   };
+
   return (
     <Modal isOpen={isRegisterOpen} size="sm" placement="top-center" onOpenChange={closeRegister}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Register</ModalHeader>
         <div className="px-4">
-        <ModalBody>
-          {/* Correo */}
-          <Input name="username" label="User" placeholder="Enter your User" variant="bordered" onChange={handleChange} />
-          <Input name="password" label="Password" placeholder="Enter your Password" type="password" variant="bordered" onChange={handleChange} />
-          <Input name="email" label="Mail" placeholder="Enter your mail" variant="bordered" onChange={handleChange} />
-          {/* <Input label="Name" placeholder="Enter your Name" variant="bordered" /> */}
-          {/* Edad y Horóscopo en la misma línea */}
-          <div className="flex gap-4">
-              <Input name="age" label="Age" placeholder="Enter your age" type="number" variant="bordered" onChange={handleChange} />
-              <Select name="zodiacSign" className="max-w-xs" label="Select Horoscope" onChange={handleChange}>
-                {horoscopos.map((horoscopo) => (
-                  <SelectItem key={horoscopo.key} data-value={horoscopo.key}>{horoscopo.label}</SelectItem>
-                ))}
-              </Select>
-            </div>
+          <ModalBody>
+            {/* Inputs de registro */}
+            <Input label="User" placeholder="Enter your User" variant="bordered" />
+            <Input label="Password" placeholder="Enter your Password" type="password" variant="bordered" />
+            <Input label="Mail" placeholder="Enter your mail" variant="bordered" />
+            <Input label="Name" placeholder="Enter your Name" variant="bordered" />
+
+            {/* Edad y Horóscopo en la misma línea */}
             <div className="flex gap-4">
-              <Select name="gender" className="max-w-xs" label="What is your gender?" onChange={handleChange}>
-                {generos.map((genero) => (
-                  <SelectItem key={genero.key} data-value={genero.key}>{genero.label}</SelectItem>
-                ))}
-              </Select>
-              <Select name="preferredGender" className="max-w-xs" label="What gender do you like?" onChange={handleChange}>
-                {generos.map((genero) => (
-                  <SelectItem key={genero.key} data-value={genero.key}>{genero.label}</SelectItem>
+              <Input label="Age" placeholder="pon tu edad" type="number" variant="bordered" />
+              <Select className="max-w-xs" label="Seleciona un horoscopo">
+                {horoscopos.map((horoscopo) => (
+                  <SelectItem key={horoscopo.key}>{horoscopo.label}</SelectItem>
                 ))}
               </Select>
             </div>
-          
 
-          {/* Botón para subir imagen */}
-          <div className="py-4 flex justify-end">
-            <Button color="primary">
-              Upload Image
-              <input type="file" ref={imageRef} accept="image/*" hidden />
+            <div className="flex gap-4">
+              <Select className="max-w-xs" label="Cual es tu genero?">
+                {generos.map((genero) => (
+                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
+                ))}
+              </Select>
+              <Select className="max-w-xs" label="Que genero te gusta?">
+                {generos.map((genero) => (
+                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div className='flex justify-end'>
+      {/* Mensaje con el nombre del archivo */}
+            {selectedFileName && (
+              <p className="text-xs text-gray-600 text-right">
+                Archivo guardado: {selectedFileName}
+              </p>
+            )}
+            {/* Botón para subir imagen */}
+            <div className="py-4 flex justify-end">
+              <Button color="primary" as="label">
+                Upload Image
+                <input type="file" hidden onChange={handleFileChange} />
+              </Button>
+            </div>
+        </div>
+      
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="flat" onPress={closeRegister}>
+              Close
             </Button>
-          </div>
-
-          {/* Otros campos */}
-          
-        </ModalBody>
-        <ModalFooter> 
-            <div className="justify-start">
-            <Button color="primary">
-              Upload Image
-              <input type="file" hidden />
+            <Button color="primary" onPress={closeRegister}>
+              Sign up
             </Button>
-          </div>
-          <Button color="danger" variant="flat" onPress={closeRegister}>
-            Close
-          </Button>
-          <Button color="primary" onPress={closeRegister}>
-            Sign up
-          </Button>
-          
-        </ModalFooter>
+          </ModalFooter>
         </div>
       </ModalContent>
     </Modal>
