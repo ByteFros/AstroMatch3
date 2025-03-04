@@ -1,112 +1,126 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import CheckmarkIcon from "@/app/icons/checkmark-icon"
 import CloseIcon from "@/app/icons/close-icon"
 import Image from "next/image"
 import { motion, useAnimation, type PanInfo } from "framer-motion"
 
 // Sample profiles data
-const profiles = [
-  {
-    id: 1,
-    name: "Sofia",
-    age: 28,
-    image: "/placeholder.svg?height=500&width=400",
-    bio: "Love hiking and outdoor adventures",
-  },
-  {
-    id: 2,
-    name: "Marco",
-    age: 32,
-    image: "/placeholder.svg?height=500&width=400",
-    bio: "Foodie and travel enthusiast",
-  },
-  {
-    id: 3,
-    name: "Elena",
-    age: 26,
-    image: "/placeholder.svg?height=500&width=400",
-    bio: "Art lover and coffee addict",
-  },
-  {
-    id: 4,
-    name: "Carlos",
-    age: 30,
-    image: "/placeholder.svg?height=500&width=400",
-    bio: "Music producer and dog lover",
-  },
-  {
-    id: 5,
-    name: "Lucia",
-    age: 27,
-    image: "/placeholder.svg?height=500&width=400",
-    bio: "Yoga instructor and bookworm",
-  },
-]
+// const profiles = [
+//   {
+//     id: 1,
+//     name: "Sofia",
+//     age: 28,
+//     image: "/placeholder.svg?height=500&width=400",
+//     bio: "Love hiking and outdoor adventures",
+//   },
+//   {
+//     id: 2,
+//     name: "Marco",
+//     age: 32,
+//     image: "/placeholder.svg?height=500&width=400",
+//     bio: "Foodie and travel enthusiast",
+//   },
+//   {
+//     id: 3,
+//     name: "Elena",
+//     age: 26,
+//     image: "/placeholder.svg?height=500&width=400",
+//     bio: "Art lover and coffee addict",
+//   },
+//   {
+//     id: 4,
+//     name: "Carlos",
+//     age: 30,
+//     image: "/placeholder.svg?height=500&width=400",
+//     bio: "Music producer and dog lover",
+//   },
+//   {
+//     id: 5,
+//     name: "Lucia",
+//     age: 27,
+//     image: "/placeholder.svg?height=500&width=400",
+//     bio: "Yoga instructor and bookworm",
+//   },
+// ]
 
 export default function SwipeInterface() {
+
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState<string | null>(null)
   const controls = useAnimation()
   const constraintsRef = useRef(null)
 
-  const currentProfile = profiles[currentIndex]
-  const nextProfile = profiles[currentIndex + 1]
+    // Cargar perfiles desde el backend
+  useEffect(() => {
+    async function fetchProfiles() {
+
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await fetch("http://localhost:8080/api/users/profiles",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            }
+          }
+        );
+        const data = await response.json();
+        setProfiles(data);
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+      }
+    }
+    fetchProfiles();
+  }, []);
+  // Si no hay perfiles
+  if (profiles.length === 0) {
+    return <div className="text-center text-xl">No more profiles to show!</div>;
+  }
+
+  const currentProfile = profiles[currentIndex];
+  const nextProfile = profiles[currentIndex + 1];
 
   const handleSwipe = async (direction: string) => {
-    const xMove = direction === "right" ? 600 : -600
-
-    setDirection(direction)
+    const xMove = direction === "right" ? 600 : -600;
+    setDirection(direction);
 
     await controls.start({
       x: xMove,
       rotate: direction === "right" ? 30 : -30,
       transition: { duration: 0.5 },
-    })
+    });
 
-    // Move to next profile
     if (currentIndex < profiles.length - 1) {
-      setCurrentIndex((prev) => prev + 1)
+      setCurrentIndex((prev) => prev + 1);
     } else {
-      // Reset to first profile when we reach the end
-      setCurrentIndex(0)
+      setCurrentIndex(0);
     }
 
-    // Reset card position
-    controls.start({ x: 0, rotate: 0, transition: { duration: 0 } })
-    setDirection(null)
-  }
+    controls.start({ x: 0, rotate: 0, transition: { duration: 0 } });
+    setDirection(null);
+  };
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const threshold = 100
+    const threshold = 100;
     if (info.offset.x > threshold) {
-      handleSwipe("right")
+      handleSwipe("right");
     } else if (info.offset.x < -threshold) {
-      handleSwipe("left")
+      handleSwipe("left");
     } else {
-      // Reset position if not swiped far enough
-      controls.start({ x: 0, rotate: 0, transition: { duration: 0.5 } })
+      controls.start({ x: 0, rotate: 0, transition: { duration: 0.5 } });
     }
-  }
-
-  if (!currentProfile) {
-    return <div className="text-center text-xl">No more profiles to show!</div>
-  }
-
-  return (
+  };  return (
     <div className="relative w-full max-w-sm mx-auto h-[600px]" ref={constraintsRef}>
       {/* Next profile (shown underneath) */}
       {nextProfile && (
         <div className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden shadow-xl">
           <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
-            <Image
-              src={nextProfile.image || "/placeholder.svg"}
-              alt={nextProfile.name}
-              fill
-              className="object-cover"
-              priority
-            />
+          <Image src={`http://localhost:8080${nextProfile.image}`} alt={nextProfile.name} fill className="object-cover" priority />
           </div>
         </div>
       )}
@@ -120,13 +134,7 @@ export default function SwipeInterface() {
         animate={controls}
       >
         <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
-          <Image
-            src={currentProfile.image || "/placeholder.svg"}
-            alt={currentProfile.name}
-            fill
-            className="object-cover"
-            priority
-          />
+        <Image src={`http://localhost:8080${currentProfile.image}`} alt={currentProfile.name} fill className="object-cover" priority />
 
           {/* Profile info overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">

@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -37,6 +39,24 @@ public class UserController {
 
         csvImportService.importCsv(file);
         return ResponseEntity.ok("Usuarios importados correctamente.");
+    }
+
+    @GetMapping("/profiles")
+    public ResponseEntity<List<?>> getProfiles() {
+        List<UserModel> users = userService.getAllProfiles();
+
+        // Convertir datos para la vista en React
+        List<Object> formattedUsers = users.stream().map(user -> {
+            return new Object() {
+                public final Long id = user.getId();
+                public final String name = user.getUsername();
+                public final int age = user.getAge();
+                public final String image = user.getProfileImageUrl();
+                public final String bio = user.getBio() != null ? user.getBio() : "No bio available";
+            };
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(formattedUsers);
     }
 
 

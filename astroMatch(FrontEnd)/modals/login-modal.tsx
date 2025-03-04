@@ -1,23 +1,22 @@
-'use client';
+"use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Importar router de Next.js
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Checkbox, Link } from "@heroui/react";
 import { useAuthStore } from "@/store/authStore";
 
 export default function LoginModal() {
   const { isLoginOpen, closeLogin } = useAuthStore();
+  const router = useRouter(); // Hook para manejar navegación
 
-  // Estado para capturar credenciales
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Manejar cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  // Manejar login
   const handleLogin = async () => {
-    setErrorMessage(null); // Limpiar error antes de una nueva solicitud
+    setErrorMessage(null);
 
     try {
       const response = await fetch("http://localhost:8080/api/auth/login", {
@@ -33,15 +32,18 @@ export default function LoginModal() {
         return;
       }
 
-      // Guardar token y datos del usuario
+      // Guardar token y datos del usuario en localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
       localStorage.setItem("role", data.role);
 
       alert("Inicio de sesión exitoso");
 
-      // Cerrar modal después de iniciar sesión
+      // Cerrar modal
       closeLogin();
+
+      // Redirigir a la vista de matches
+      router.push("/matches");
     } catch (error) {
       console.error("Error en el login:", error);
       setErrorMessage("Hubo un problema con el inicio de sesión.");

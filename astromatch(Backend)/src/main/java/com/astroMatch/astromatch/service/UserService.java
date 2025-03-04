@@ -19,4 +19,8 @@ public class UserService {
     public List<UserModel> getAllUserUsers(){
         return userRepository.findByRole(Role.USER);
     }
+
+    public List<UserModel> getAllProfiles(){
+        return userRepository.findAll();
+    }
 }

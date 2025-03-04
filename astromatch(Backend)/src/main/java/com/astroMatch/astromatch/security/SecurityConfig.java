@@ -44,9 +44,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sin sesiones, solo JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Permitir login y registro
+                        .requestMatchers("/uploads/**").permitAll() // Permite acceso a las imagenes
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/superadmin/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/users/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // 🔥 AGREGAR EL FILTRO JWT
