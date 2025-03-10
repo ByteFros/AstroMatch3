@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,7 +42,19 @@ public class AuthController {
             @RequestParam("age") Integer age,
             @RequestParam("gender") String gender,
             @RequestParam("preferredGender") String preferredGender,
+            @RequestParam("zodiacSign") String zodiacSign, // ✅ Signo zodiacal
             @RequestParam("file") MultipartFile file) {
+
+        // Lista de signos zodiacales válidos
+        List<String> validZodiacSigns = List.of(
+                "Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo",
+                "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"
+        );
+
+        // ✅ Verificar si el signo ingresado es válido
+        if (!validZodiacSigns.contains(zodiacSign)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Signo zodiacal inválido"));
+        }
 
         // Verificar si el usuario ya existe
         if (userRepository.findByUsername(username).isPresent()) {
@@ -60,8 +73,9 @@ public class AuthController {
             user.setAge(age);
             user.setGender(gender);
             user.setPreferredGender(preferredGender);
+            user.setZodiacSign(zodiacSign);
             user.setProfileImageUrl(imageUrl);
-            user.setRole(Role.USER); // Se asigna automáticamente USER
+            user.setRole(Role.USER);
 
             // Guardar usuario en la BD
             UserModel savedUser = userRepository.save(user);
@@ -75,6 +89,7 @@ public class AuthController {
             response.put("token", token);
             response.put("role", savedUser.getRole());
             response.put("imageUrl", savedUser.getProfileImageUrl());
+            response.put("zodiacSign", savedUser.getZodiacSign());
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -89,7 +104,7 @@ public class AuthController {
         Optional<UserModel> foundUser = userRepository.findByUsername(user.getUsername());
 
         if (foundUser.isEmpty() || !passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            return ResponseEntity.status(401).body(Map.of("message", "Usuario o Contraseña incorrectos"));
+            return ResponseEntity.status(403).body(Map.of("message", "Usuario o Contraseña incorrectos"));
         }
 
         UserModel loggedUser = foundUser.get();
