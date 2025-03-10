@@ -17,7 +17,7 @@ export default function SwipeInterface() {
     async function fetchProfiles() {
       const token = localStorage.getItem("token")
       try {
-        const response = await fetch("http://localhost:8080/api/users/profiles", {
+        const response = await fetch("http://localhost:8080/api/users/matches", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -77,8 +77,8 @@ export default function SwipeInterface() {
         <div className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden shadow-xl">
           <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
             <Image
-              src={`http://localhost:8080${nextProfile.image}`}
-              alt={nextProfile.name}
+              src={`http://localhost:8080${nextProfile.profileImageUrl}`}
+              alt={nextProfile.username || "Perfil sin nombre"}
               fill
               className="object-cover"
               priority
@@ -96,8 +96,8 @@ export default function SwipeInterface() {
 >
   <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
     <Image
-      src={`http://localhost:8080${currentProfile.image}`}
-      alt={currentProfile.name}
+      src={`http://localhost:8080${currentProfile.profileImageUrl}`}
+      alt={currentProfile.username || "Perfil sin nombre"}
       fill
       className="object-cover"
       priority
@@ -106,9 +106,10 @@ export default function SwipeInterface() {
 
     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
       <h2 className="text-2xl font-bold">
-        {currentProfile.name}, {currentProfile.age}
+        {currentProfile.username}, {currentProfile.age}
       </h2>
       <p className="mt-2">{currentProfile.bio}</p>
+      <p className="mt-2 text-lg">✨ Compatibilidad: {currentProfile.compatibility}%</p> {/* ✅ Mostrar compatibilidad */}
     </div>
 
     {direction === "right" && (
