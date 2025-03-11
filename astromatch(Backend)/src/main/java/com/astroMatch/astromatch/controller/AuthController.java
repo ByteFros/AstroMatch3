@@ -2,7 +2,7 @@ package com.astroMatch.astromatch.controller;
 import com.astroMatch.astromatch.model.Role;
 import com.astroMatch.astromatch.model.UserModel;
 import com.astroMatch.astromatch.repository.UserRepository;
-import com.astroMatch.astromatch.security.JwtUtil;
+import com.astroMatch.astromatch.security.jwt.JwtUtil;
 import com.astroMatch.astromatch.service.ImageStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +104,7 @@ public class AuthController {
         Optional<UserModel> foundUser = userRepository.findByUsername(user.getUsername());
 
         if (foundUser.isEmpty() || !passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            return ResponseEntity.status(403).body(Map.of("message", "Usuario o Contraseña incorrectos"));
+            return ResponseEntity.status(403    ).body(Map.of("message", "Usuario o Contraseña incorrectos"));
         }
 
         UserModel loggedUser = foundUser.get();

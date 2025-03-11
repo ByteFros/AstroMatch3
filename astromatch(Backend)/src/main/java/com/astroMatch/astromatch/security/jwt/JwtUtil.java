@@ -1,4 +1,4 @@
-package com.astroMatch.astromatch.security;
+package com.astroMatch.astromatch.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

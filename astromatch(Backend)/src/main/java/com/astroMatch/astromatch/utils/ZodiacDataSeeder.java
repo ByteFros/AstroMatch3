@@ -5,8 +5,7 @@ import com.astroMatch.astromatch.repository.ZodiacRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class ZodiacDataSeeder implements CommandLineRunner {
@@ -26,18 +25,29 @@ public class ZodiacDataSeeder implements CommandLineRunner {
                     "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"
             );
 
+            Map<String, Integer> compatibilityMap = new HashMap<>();
+
             for (String sign1 : signos) {
                 for (String sign2 : signos) {
+                    String key1 = sign1 + "-" + sign2; // Ejemplo: "Cáncer-Virgo"
+                    String key2 = sign2 + "-" + sign1; // Ejemplo: "Virgo-Cáncer"
+
                     int compatibility;
 
-                    if (sign1.equals(sign2)) {
-                        // Si los signos son iguales, asignar compatibilidad más alta (ej. 50-100)
-                        compatibility = 50 + random.nextInt(51); // Entre 50 y 100
+                    if (compatibilityMap.containsKey(key2)) {
+                        // ✅ Si ya existe la combinación inversa, usar el mismo valor
+                        compatibility = compatibilityMap.get(key2);
                     } else {
-                        // Si los signos son diferentes, asignar un valor aleatorio de 0 a 100
-                        compatibility = random.nextInt(101);
+                        // ✅ Si es una combinación nueva, generar el valor
+                        if (sign1.equals(sign2)) {
+                            compatibility = 50 + random.nextInt(51); // Entre 50 y 100 si es el mismo signo
+                        } else {
+                            compatibility = random.nextInt(101); // Entre 0 y 100 para signos diferentes
+                        }
+                        compatibilityMap.put(key1, compatibility); // Guardamos en el mapa
                     }
 
+                    // ✅ Insertar en la base de datos con la misma compatibilidad en ambas direcciones
                     ZodiacModel compatibilityEntry = new ZodiacModel();
                     compatibilityEntry.setSign1(sign1);
                     compatibilityEntry.setSign2(sign2);
@@ -45,7 +55,7 @@ public class ZodiacDataSeeder implements CommandLineRunner {
                     zodiacRepository.save(compatibilityEntry);
                 }
             }
-            System.out.println("⚡ Datos de compatibilidad zodiacal insertados exitosamente (incluyendo signos iguales)");
+            System.out.println("⚡ Datos de compatibilidad zodiacal insertados correctamente con valores bilaterales.");
         }
     }
 }

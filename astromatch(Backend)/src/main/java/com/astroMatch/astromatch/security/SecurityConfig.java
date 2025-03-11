@@ -1,5 +1,6 @@
 package com.astroMatch.astromatch.security;
 
+import com.astroMatch.astromatch.security.jwt.JwtAuthenticationFilter;
 import com.astroMatch.astromatch.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +38,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Deshabilita CSRF para permitir peticiones desde el frontend
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

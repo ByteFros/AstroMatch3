@@ -1,4 +1,4 @@
-package com.astroMatch.astromatch.security;
+package com.astroMatch.astromatch.security.jwt;
 
 import com.astroMatch.astromatch.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
