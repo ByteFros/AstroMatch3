@@ -4,18 +4,18 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input
 import { useAuthStore } from "@/store/authStore";
 
 export const horoscopos = [
-  { key: "aries", label: "Aries" },
-  { key: "taurus", label: "Taurus" },
-  { key: "gemini", label: "Gemini" },
-  { key: "cancer", label: "Cancer" },
-  { key: "leo", label: "Leo" },
-  { key: "virgo", label: "Virgo" },
-  { key: "libra", label: "Libra" },
-  { key: "scorpio", label: "Scorpio" },
-  { key: "sagittarius", label: "Sagittarius" },
-  { key: "capricorn", label: "Capricorn" },
-  { key: "aquarius", label: "Aquarius" },
-  { key: "pisces", label: "Pisces" }
+  { key: "Aries", label: "Aries" },
+  { key: "Tauro", label: "Tauro" },
+  { key: "Géminis", label: "Géminis" },
+  { key: "Cáncer", label: "Cáncer" },
+  { key: "Leo", label: "Leo" },
+  { key: "Virgo", label: "Virgo" },
+  { key: "Libra", label: "Libra" },
+  { key: "Escorpio", label: "Escorpio" },
+  { key: "Sagittario", label: "Sagittario" },
+  { key: "Capricornio", label: "Capricornio" },
+  { key: "Aquario", label: "Aquario" },
+  { key: "Piscis", label: "Piscis" }
 ];
 
 export const generos = [
@@ -35,11 +35,17 @@ export default function RegisterModal() {
     age: "",
     gender: "",
     preferredGender: "",
+    zodiacSign: "",
   });
 
   // Manejar cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Manejar cambios en Selects de HeroUI manualmente
+  const handleSelectChange = (key: string, value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   // Manejar cambio de archivo
@@ -66,6 +72,7 @@ export default function RegisterModal() {
     formDataToSend.append("age", formData.age);
     formDataToSend.append("gender", formData.gender);
     formDataToSend.append("preferredGender", formData.preferredGender);
+    formDataToSend.append("zodiacSign", formData.zodiacSign);
     formDataToSend.append("file", file);
 
     try {
@@ -107,9 +114,9 @@ export default function RegisterModal() {
             {/* Edad y Horóscopo en la misma línea */}
             <div className="flex gap-4">
               <Input name="age" label="Age" placeholder="Enter your age" type="number" variant="bordered" onChange={handleChange} />
-              <Select name="zodiacSign" className="max-w-xs" label="Select Horoscope" onChange={handleChange}>
+              <Select name="zodiacSign" className="max-w-xs" label="Select Horoscope" onSelectionChange={(value) => handleSelectChange("zodiacSign", Array.from(value)[0] as string)}>
                 {horoscopos.map((horoscopo) => (
-                  <SelectItem key={horoscopo.key}>{horoscopo.label}</SelectItem>
+                  <SelectItem key={horoscopo.key}>{horoscopo.key}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -117,12 +124,12 @@ export default function RegisterModal() {
             <div className="flex gap-4">
               <Select name="gender" className="max-w-xs" label="What is your gender?" onChange={handleChange}>
                 {generos.map((genero) => (
-                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
+                  <SelectItem key={genero.key}>{genero.key}</SelectItem>
                 ))}
               </Select>
               <Select name="preferredGender" className="max-w-xs" label="What gender do you like?" onChange={handleChange}>
                 {generos.map((genero) => (
-                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
+                  <SelectItem key={genero.key}>{genero.key}</SelectItem>
                 ))}
               </Select>
             </div>

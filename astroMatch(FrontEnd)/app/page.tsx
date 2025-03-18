@@ -11,6 +11,7 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from "@h
 
 export const AcmeLogo = () => {
   return (
+    
     <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
       <path
         clipRule="evenodd"
@@ -19,6 +20,7 @@ export const AcmeLogo = () => {
         fillRule="evenodd"
       />
     </svg>
+    
   );
 };
 
