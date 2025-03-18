@@ -14,7 +14,7 @@ export const horoscopos = [
   { key: "Escorpio", label: "Escorpio" },
   { key: "Sagittario", label: "Sagittario" },
   { key: "Capricornio", label: "Capricornio" },
-  { key: "Aquario", label: "Aquario" },
+  { key: "Acuario", label: "Acuario" },
   { key: "Piscis", label: "Piscis" }
 ];
 
