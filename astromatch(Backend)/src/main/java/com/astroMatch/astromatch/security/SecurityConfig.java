@@ -1,7 +1,7 @@
 package com.astroMatch.astromatch.security;
 
-import com.astroMatch.astromatch.security.jwt.JwtAuthenticationFilter;
-import com.astroMatch.astromatch.service.CustomUserDetailsService;
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.astroMatch.astromatch.security.jwt.JwtAuthenticationFilter;
+import com.astroMatch.astromatch.service.CustomUserDetailsService;
 
 @Configuration
 public class SecurityConfig {
@@ -45,10 +46,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sin sesiones, solo JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Permitir login y registro
-                        .requestMatchers("/uploads/**").permitAll() // Permite acceso a las imagenes
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/superadmin/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/users/**").hasRole("USER")
+                        .requestMatchers("/uploads/**").permitAll() // Permitir acceso a imágenes
+                        .requestMatchers("/api/matches/**").authenticated() // Proteger rutas de matches
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // 🔥 AGREGAR EL FILTRO JWT

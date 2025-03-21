@@ -1,20 +1,28 @@
 package com.astroMatch.astromatch.controller;
-import com.astroMatch.astromatch.model.Role;
-import com.astroMatch.astromatch.model.UserModel;
-import com.astroMatch.astromatch.repository.UserRepository;
-import com.astroMatch.astromatch.security.jwt.JwtUtil;
-import com.astroMatch.astromatch.service.ImageStorageService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.astroMatch.astromatch.model.Role;
+import com.astroMatch.astromatch.model.UserModel;
+import com.astroMatch.astromatch.repository.UserRepository;
+import com.astroMatch.astromatch.security.jwt.JwtUtil;
+import com.astroMatch.astromatch.service.ImageStorageService;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")  // Quitamos la barra final y usamos allowCredentials en la config global
 @RestController
@@ -122,5 +130,29 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
+    }
+
+    @GetMapping("/isLoggedIn")
+    public ResponseEntity<?> isLoggedIn(@RequestHeader("Authorization") String token) {
+        try {
+            // Verificar si el token es válido
+            if (token == null || !token.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("isLoggedIn", false, "message", "Token no proporcionado o inválido"));
+            }
+
+            // Extraer el token sin el prefijo "Bearer "
+            String jwtToken = token.substring(7);
+
+            // Validar el token
+            String username = jwtUtil.extractUsername(jwtToken);
+            if (username == null || userRepository.findByUsername(username).isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("isLoggedIn", false, "message", "Token inválido o usuario no encontrado"));
+            }
+
+            // Si el token es válido y el usuario existe
+            return ResponseEntity.ok(Map.of("isLoggedIn", true, "username", username));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("isLoggedIn", false, "message", "Error al validar el token: " + e.getMessage()));
+        }
     }
 }
