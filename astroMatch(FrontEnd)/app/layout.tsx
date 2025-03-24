@@ -9,8 +9,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 
-import SplitText from "@/components/ui/splitText";
-import { easings } from "@react-spring/web";
+
 
 export const metadata: Metadata = {
   title: {

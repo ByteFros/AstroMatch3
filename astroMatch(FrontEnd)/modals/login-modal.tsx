@@ -37,7 +37,7 @@ export default function LoginModal() {
       localStorage.setItem("username", data.username);
       localStorage.setItem("role", data.role);
 
-      alert("Inicio de sesión exitoso");
+
 
       // Cerrar modal
       closeLogin();

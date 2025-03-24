@@ -16,7 +16,7 @@ import RegisterModal from "@/modals/Register-modal";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "next/navigation"; // Importa el hook useRouter
+import { usePathname, useRouter } from "next/navigation"
 
 const checkLoginStatus = async () => {
   const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
@@ -34,6 +34,7 @@ export const Navbar = () => {
   const { openLogin, openRegister } = useAuthStore();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para manejar si el usuario está logueado
   const [loading, setLoading] = useState(true); // Estado para manejar la carga
+  const pathname = usePathname()
   const router = useRouter(); // Instancia del router
 
   useEffect(() => {
@@ -96,52 +97,85 @@ export const Navbar = () => {
       </>
     );
   } else {
+    const filteredNavItems = [
+      { href: "/dashboard", label: "Dashboard", icon: "📊" },
+
+    ];
+
     return (
-      <HeroUINavbar isBordered isBlurred={false}>
-        <NavbarBrand>
-          <p
-            className="font-bold text-inherit cursor-pointer"
-            onClick={() => router.push("/")} // Redirige a "/"
-          >
-            AstroMatch
-          </p>
-        </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarItem>
-            <Link href="#">About us</Link>
+    <>
+    <HeroUINavbar isBordered isBlurred={false}>
+      <NavbarBrand >
+        <Link href="/" className="font-bold text-xl">
+          AstroMtach
+        </Link>
+      </NavbarBrand>
+
+      <NavbarContent className="hidden sm:flex gap-4">
+        {filteredNavItems.map((item) => (
+          <NavbarItem key={item.href} isActive={pathname === item.href}>
+            <Link
+              href={item.href}
+              className={`flex items-center text-sm font-medium transition-colors hover:text-primary ${
+                pathname === item.href ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <span className="mr-2">{item.icon}</span>
+              {item.label}
+            </Link>
           </NavbarItem>
-          <NavbarItem>
-            <Link href="#">Astral Card</Link>
-          </NavbarItem>
-        </NavbarContent>
-        <NavbarContent justify="end">
-          <Dropdown placement="bottom-end">
+        ))}
+      </NavbarContent>
+
+      <NavbarContent justify="end">
+        {isLoggedIn ? (
+          <Dropdown>
             <DropdownTrigger>
               <Avatar
                 as="button"
-                size="md"
-                src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                className="transition-transform"
+                src="/placeholder.svg?height=32&width=32"
+                size="sm"
               />
             </DropdownTrigger>
-            <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2">
-                <p className="font-semibold">Signed in as</p>
-                <p className="font-semibold">zoey@example.com</p>
+            <DropdownMenu aria-label="Acciones de perfil">
+              <DropdownItem textValue="Información de usuario" className="h-14 gap-2" key={""}>
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium">Usuario</p>
+                  <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
+                </div>
               </DropdownItem>
-              <DropdownItem key="settings">Perfil</DropdownItem>
-              <DropdownItem key="team_settings">Configuracion</DropdownItem>
-              <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-              <DropdownItem
-                key="logout"
-                color="danger"
-                onClick={handleLogout} // Simula cerrar sesión
-              >
-                Cerrar Sesión
+              <DropdownItem key="profile">
+                <span className="mr-2">👤</span>
+                <Link href="/settings/profile" className="w-full">
+                  Perfil
+                </Link>
+              </DropdownItem>
+              <DropdownItem key="configuration">
+                <span className="mr-2">⚙️</span>
+                <Link href="/settings/configuration" className="w-full">
+                  Configuración
+                </Link>
+              </DropdownItem>
+              <DropdownItem key="logout" onClick={handleLogout}>
+                <span className="mr-2">🚪</span>
+                <span>Cerrar sesión</span>
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-        </NavbarContent>
-      </HeroUINavbar>
+        ) : (
+          <div className="flex gap-2">
+            <Button variant="flat" onClick={LoginModal}>
+              Iniciar sesión
+            </Button>
+            <Button color="primary" onClick={openRegister}>
+              Registrarse
+            </Button>
+          </div>
+        )}
+      </NavbarContent>
+    </HeroUINavbar>
+    </>
     );
   }
 };
