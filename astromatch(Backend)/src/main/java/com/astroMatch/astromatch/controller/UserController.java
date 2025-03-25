@@ -67,23 +67,25 @@ public class UserController {
         return ResponseEntity.ok(formattedUsers);
     }
 
-    @GetMapping("/matches")
-    public ResponseEntity<List<Map<String, Object>>> getUserMatches(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "80") int minCompatibility) {
 
-        Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
 
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+   // @GetMapping("/matches")
+   // public ResponseEntity<List<Map<String, Object>>> getUserMatches(
+    //        @AuthenticationPrincipal UserDetails userDetails,
+     //       @RequestParam(defaultValue = "80") int minCompatibility) {
 
-        String userSign = user.get().getZodiacSign();
-        String preferredGender = user.get().getPreferredGender();
+//        Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
 
-        List<Map<String, Object>> matches = userService.findMatchesByZodiac(userSign, minCompatibility, preferredGender);
-        return ResponseEntity.ok(matches);
-    }
+  //      if (user.isEmpty()) {
+    //        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+      //  }
+
+       // String userSign = user.get().getZodiacSign();
+       // String preferredGender = user.get().getPreferredGender();
+
+       // List<Map<String, Object>> matches = userService.findMatchesByZodiac(userSign, minCompatibility, preferredGender);
+       // return ResponseEntity.ok(matches);
+   // }
 
 
 }

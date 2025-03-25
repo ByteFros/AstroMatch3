@@ -17,7 +17,7 @@ export default function SwipeInterface() {
     async function fetchProfiles() {
       const token = localStorage.getItem("token")
       try {
-        const response = await fetch("http://localhost:8080/api/users/matches", {
+        const response = await fetch("http://localhost:8080/api/matches", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
