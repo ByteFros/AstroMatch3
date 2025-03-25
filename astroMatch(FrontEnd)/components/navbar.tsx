@@ -27,40 +27,49 @@ import ProfileIcon from "@/app/icons/profile-icon"
 import ConfigIcon from "@/app/icons/config-icon"
 import LogoutIcon from "@/app/icons/logout-icon"
 
-const checkLoginStatus = async () => {
-  const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  })
-
-  const data = await response.json()
-  return data.isLoggedIn
-}
-
 export const Navbar = () => {
-  const { openLogin, openRegister } = useAuthStore()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { openLogin, openRegister, isLoggedIn, user, logout, checkAuth } = useAuthStore()
   const [loading, setLoading] = useState(true)
   const [newMatches, setNewMatches] = useState(3) // Número de nuevos matches (para la notificación)
   const pathname = usePathname()
   const router = useRouter()
 
+  // Check authentication status on component mount
   useEffect(() => {
-    const fetchLoginStatus = async () => {
-      const status = await checkLoginStatus()
-      setIsLoggedIn(status)
+    const verifyAuth = async () => {
+      // First check local storage
+      const hasLocalAuth = checkAuth()
+
+      if (hasLocalAuth) {
+        // Verify with server
+        try {
+          const token = localStorage.getItem("token")
+          const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+
+          const data = await response.json()
+          if (!data.isLoggedIn) {
+            // If server says not logged in, but we have local token, logout
+            logout()
+          }
+        } catch (error) {
+          console.error("Error verifying auth status:", error)
+        }
+      }
+
       setLoading(false)
     }
 
-    fetchLoginStatus()
-  }, [])
+    verifyAuth()
+  }, [checkAuth, logout])
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    setIsLoggedIn(false)
-    window.location.reload()
+    logout()
+    router.push("/")
   }
 
   if (loading) {
@@ -172,7 +181,7 @@ export const Navbar = () => {
               <DropdownMenu aria-label="Acciones de perfil">
                 <DropdownItem textValue="Información de usuario" className="h-14 gap-2" key="user-info">
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium">Usuario</p>
+                    <p className="text-sm font-medium">{user.username || "Usuario"}</p>
                     <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
                   </div>
                 </DropdownItem>

@@ -1,7 +1,19 @@
-'use client'
-import React, { useRef, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Checkbox, Link, Select, SelectItem } from "@heroui/react";
-import { useAuthStore } from "@/store/authStore";
+"use client"
+import type React from "react"
+import { useRef, useState } from "react"
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Select,
+  SelectItem,
+} from "@heroui/react"
+import { useAuthStore } from "@/store/authStore"
+import { useRouter } from "next/navigation"
 
 export const horoscopos = [
   { key: "Aries", label: "Aries" },
@@ -15,18 +27,19 @@ export const horoscopos = [
   { key: "Sagittario", label: "Sagittario" },
   { key: "Capricornio", label: "Capricornio" },
   { key: "Acuario", label: "Acuario" },
-  { key: "Piscis", label: "Piscis" }
-];
+  { key: "Piscis", label: "Piscis" },
+]
 
 export const generos = [
   { key: "male", label: "Hombre" },
-  { key: "female", label: "Mujer" }
-];
+  { key: "female", label: "Mujer" },
+]
 
 export default function RegisterModal() {
-  const { isRegisterOpen, closeRegister } = useAuthStore();
-  const [selectedFileName, setSelectedFileName] = useState<string>("");
-  const imageRef = useRef<HTMLInputElement>(null);
+  const { isRegisterOpen, closeRegister, login } = useAuthStore()
+  const [selectedFileName, setSelectedFileName] = useState<string>("")
+  const imageRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   const [formData, setFormData] = useState({
     username: "",
@@ -36,69 +49,73 @@ export default function RegisterModal() {
     gender: "",
     preferredGender: "",
     zodiacSign: "",
-  });
+  })
 
   // Manejar cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   // Manejar cambios en Selects de HeroUI manualmente
   const handleSelectChange = (key: string, value: string) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
+    setFormData((prev) => ({ ...prev, [key]: value }))
+  }
 
   // Manejar cambio de archivo
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files && event.target.files[0];
+    const file = event.target.files && event.target.files[0]
     if (file) {
-      setSelectedFileName(file.name);
+      setSelectedFileName(file.name)
     }
-  };
+  }
 
   // Manejar el registro de usuario
   const handleRegister = async () => {
     if (!imageRef.current || !imageRef.current.files?.length) {
-      alert("Por favor, selecciona una imagen.");
-      return;
+      alert("Por favor, selecciona una imagen.")
+      return
     }
 
-    const file = imageRef.current.files[0];
+    const file = imageRef.current.files[0]
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("username", formData.username);
-    formDataToSend.append("password", formData.password);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("age", formData.age);
-    formDataToSend.append("gender", formData.gender);
-    formDataToSend.append("preferredGender", formData.preferredGender);
-    formDataToSend.append("zodiacSign", formData.zodiacSign);
-    formDataToSend.append("file", file);
+    const formDataToSend = new FormData()
+    formDataToSend.append("username", formData.username)
+    formDataToSend.append("password", formData.password)
+    formDataToSend.append("email", formData.email)
+    formDataToSend.append("age", formData.age)
+    formDataToSend.append("gender", formData.gender)
+    formDataToSend.append("preferredGender", formData.preferredGender)
+    formDataToSend.append("zodiacSign", formData.zodiacSign)
+    formDataToSend.append("file", file)
 
     try {
       const response = await fetch("http://localhost:8080/api/auth/register", {
         method: "POST",
         body: formDataToSend,
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!response.ok) {
-        alert(data.message || "Error al registrar el usuario");
-        return;
+        alert(data.message || "Error al registrar el usuario")
+        return
       }
 
-      // Guardar token en localStorage
-      localStorage.setItem("token", data.token);
-      alert("Usuario registrado con éxito");
+      // Use the centralized login function
+      login(formData.username, "user", data.token)
+
+      alert("Usuario registrado con éxito")
 
       // Cerrar modal
-      closeRegister();
+      closeRegister()
+
+      // Redirect to matches
+      router.push("/matches")
     } catch (error) {
-      console.error("Error en el registro:", error);
-      alert("Hubo un problema con el registro.");
+      console.error("Error en el registro:", error)
+      alert("Hubo un problema con el registro.")
     }
-  };
+  }
   return (
     <Modal isOpen={isRegisterOpen} size="sm" placement="top-center" onOpenChange={closeRegister}>
       <ModalContent>
@@ -106,15 +123,40 @@ export default function RegisterModal() {
         <div className="px-4">
           <ModalBody>
             {/* Inputs de registro */}
-            <Input name="username" label="User" placeholder="Enter your User" variant="bordered" onChange={handleChange} />
-            <Input name="password" label="Password" placeholder="Enter your Password" type="password" variant="bordered" onChange={handleChange} />
+            <Input
+              name="username"
+              label="User"
+              placeholder="Enter your User"
+              variant="bordered"
+              onChange={handleChange}
+            />
+            <Input
+              name="password"
+              label="Password"
+              placeholder="Enter your Password"
+              type="password"
+              variant="bordered"
+              onChange={handleChange}
+            />
             <Input name="email" label="Mail" placeholder="Enter your mail" variant="bordered" onChange={handleChange} />
             {/* <Input label="Name" placeholder="Enter your Name" variant="bordered" /> */}
 
             {/* Edad y Horóscopo en la misma línea */}
             <div className="flex gap-4">
-              <Input name="age" label="Age" placeholder="Enter your age" type="number" variant="bordered" onChange={handleChange} />
-              <Select name="zodiacSign" className="max-w-xs" label="Select Horoscope" onSelectionChange={(value) => handleSelectChange("zodiacSign", Array.from(value)[0] as string)}>
+              <Input
+                name="age"
+                label="Age"
+                placeholder="Enter your age"
+                type="number"
+                variant="bordered"
+                onChange={handleChange}
+              />
+              <Select
+                name="zodiacSign"
+                className="max-w-xs"
+                label="Select Horoscope"
+                onSelectionChange={(value) => handleSelectChange("zodiacSign", Array.from(value)[0] as string)}
+              >
                 {horoscopos.map((horoscopo) => (
                   <SelectItem key={horoscopo.key}>{horoscopo.key}</SelectItem>
                 ))}
@@ -127,13 +169,17 @@ export default function RegisterModal() {
                   <SelectItem key={genero.key}>{genero.key}</SelectItem>
                 ))}
               </Select>
-              <Select name="preferredGender" className="max-w-xs" label="What gender do you like?" onChange={handleChange}>
+              <Select
+                name="preferredGender"
+                className="max-w-xs"
+                label="What gender do you like?"
+                onChange={handleChange}
+              >
                 {generos.map((genero) => (
                   <SelectItem key={genero.key}>{genero.key}</SelectItem>
                 ))}
               </Select>
             </div>
-
 
             {/* Subir imagen */}
             <div className="py-4 flex flex-col items-end">
@@ -155,5 +201,6 @@ export default function RegisterModal() {
         </div>
       </ModalContent>
     </Modal>
-  );
+  )
 }
+
