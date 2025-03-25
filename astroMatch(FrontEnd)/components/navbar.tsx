@@ -1,4 +1,4 @@
-'use client';
+"use client"
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -9,14 +9,17 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@heroui/react";
-import { Button } from "@heroui/react";
-import LoginModal from "@/modals/login-modal";
-import RegisterModal from "@/modals/Register-modal";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useAuthStore } from "@/store/authStore";
+  Badge,
+  Button,
+  Tooltip,
+} from "@heroui/react"
+import LoginModal from "@/modals/login-modal"
+import RegisterModal from "@/modals/Register-modal"
+import Link from "next/link"
+import { useState, useEffect } from "react"
+import { useAuthStore } from "@/store/authStore"
 import { usePathname, useRouter } from "next/navigation"
+import MatchesIcon from "@/app/icons/matches-icon"
 
 const checkLoginStatus = async () => {
   const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
@@ -24,38 +27,38 @@ const checkLoginStatus = async () => {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-  });
+  })
 
-  const data = await response.json();
-  return data.isLoggedIn;
-};
+  const data = await response.json()
+  return data.isLoggedIn
+}
 
 export const Navbar = () => {
-  const { openLogin, openRegister } = useAuthStore();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para manejar si el usuario está logueado
-  const [loading, setLoading] = useState(true); // Estado para manejar la carga
+  const { openLogin, openRegister } = useAuthStore()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [newMatches, setNewMatches] = useState(3) // Número de nuevos matches (para la notificación)
   const pathname = usePathname()
-  const router = useRouter(); // Instancia del router
+  const router = useRouter()
 
   useEffect(() => {
     const fetchLoginStatus = async () => {
-      const status = await checkLoginStatus();
-      setIsLoggedIn(status);
-      setLoading(false); // Finaliza la carga
-    };
+      const status = await checkLoginStatus()
+      setIsLoggedIn(status)
+      setLoading(false)
+    }
 
-    fetchLoginStatus();
-  }, []);
+    fetchLoginStatus()
+  }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Elimina el token del almacenamiento local
-    setIsLoggedIn(false); // Actualiza el estado local
-    window.location.reload(); // Refresca la página para aplicar los cambios
-  };
+    localStorage.removeItem("token")
+    setIsLoggedIn(false)
+    window.location.reload()
+  }
 
   if (loading) {
-    // Muestra un indicador de carga mientras se verifica el estado de inicio de sesión
-    return <div>Cargando...</div>;
+    return <div>Cargando...</div>
   }
 
   if (!isLoggedIn) {
@@ -63,10 +66,7 @@ export const Navbar = () => {
       <>
         <HeroUINavbar isBordered isBlurred={false}>
           <NavbarBrand>
-            <p
-              className="font-bold text-inherit cursor-pointer"
-              onClick={() => router.push("/")} // Redirige a "/"
-            >
+            <p className="font-bold text-inherit cursor-pointer" onClick={() => router.push("/")}>
               AstroMatch
             </p>
           </NavbarBrand>
@@ -95,87 +95,103 @@ export const Navbar = () => {
         <LoginModal />
         <RegisterModal />
       </>
-    );
+    )
   } else {
     const filteredNavItems = [
       { href: "/dashboard", label: "Dashboard", icon: "📊" },
-
-    ];
+      { href: "/matches", label: "Matches", icon: "🎴" },
+    ]
 
     return (
-    <>
-    <HeroUINavbar isBordered isBlurred={false}>
-      <NavbarBrand >
-        <Link href="/" className="font-bold text-xl">
-          AstroMtach
-        </Link>
-      </NavbarBrand>
-
-      <NavbarContent className="hidden sm:flex gap-4">
-        {filteredNavItems.map((item) => (
-          <NavbarItem key={item.href} isActive={pathname === item.href}>
-            <Link
-              href={item.href}
-              className={`flex items-center text-sm font-medium transition-colors hover:text-primary ${
-                pathname === item.href ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
+      <>
+        <HeroUINavbar isBordered isBlurred={false}>
+          <NavbarBrand>
+            <Link href="/" className="font-bold text-xl">
+              AstroMatch
             </Link>
-          </NavbarItem>
-        ))}
-      </NavbarContent>
+          </NavbarBrand>
 
-      <NavbarContent justify="end">
-        {isLoggedIn ? (
-          <Dropdown>
-            <DropdownTrigger>
-              <Avatar
-                as="button"
-                className="transition-transform"
-                src="/placeholder.svg?height=32&width=32"
-                size="sm"
-              />
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Acciones de perfil">
-              <DropdownItem textValue="Información de usuario" className="h-14 gap-2" key={""}>
-                <div className="flex flex-col">
-                  <p className="text-sm font-medium">Usuario</p>
-                  <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
-                </div>
-              </DropdownItem>
-              <DropdownItem key="profile">
-                <span className="mr-2">👤</span>
-                <Link href="/settings/profile" className="w-full">
-                  Perfil
+          <NavbarContent className="hidden sm:flex gap-4">
+            {filteredNavItems.map((item) => (
+              <NavbarItem key={item.href} isActive={pathname === item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === item.href ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
                 </Link>
-              </DropdownItem>
-              <DropdownItem key="configuration">
-                <span className="mr-2">⚙️</span>
-                <Link href="/settings/configuration" className="w-full">
-                  Configuración
-                </Link>
-              </DropdownItem>
-              <DropdownItem key="logout" onClick={handleLogout}>
-                <span className="mr-2">🚪</span>
-                <span>Cerrar sesión</span>
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        ) : (
-          <div className="flex gap-2">
-            <Button variant="flat" onClick={LoginModal}>
-              Iniciar sesión
-            </Button>
-            <Button color="primary" onClick={openRegister}>
-              Registrarse
-            </Button>
-          </div>
-        )}
-      </NavbarContent>
-    </HeroUINavbar>
-    </>
-    );
+              </NavbarItem>
+            ))}
+            <NavbarItem isActive={pathname === "/chat"}>
+              <Link
+                href="/chat"
+                className={`flex items-center text-sm font-medium transition-colors hover:text-primary ${
+                  pathname === "/chat" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <span className="mr-2">💬</span>
+                Chat
+              </Link>
+            </NavbarItem>
+          </NavbarContent>
+
+          <NavbarContent justify="end" className="gap-4">
+            {/* Nuevo botón de matches */}
+            <Tooltip content="Ver tus matches">
+              <Badge content={newMatches} color="danger" isInvisible={newMatches === 0} shape="circle" size="sm">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  aria-label="Ver matches"
+                  className="text-default-500 hover:text-primary"
+                  onPress={() => router.push("/people-matches")}
+                >
+                  <MatchesIcon size={24} />
+                </Button>
+              </Badge>
+            </Tooltip>
+
+            <Dropdown>
+              <DropdownTrigger>
+                <Avatar
+                  as="button"
+                  className="transition-transform"
+                  src="/placeholder.svg?height=32&width=32"
+                  size="sm"
+                />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Acciones de perfil">
+                <DropdownItem textValue="Información de usuario" className="h-14 gap-2" key="user-info">
+                  <div className="flex flex-col">
+                    <p className="text-sm font-medium">Usuario</p>
+                    <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="profile">
+                  <span className="mr-2">👤</span>
+                  <Link href="/settings/profile" className="w-full">
+                    Perfil
+                  </Link>
+                </DropdownItem>
+                <DropdownItem key="configuration">
+                  <span className="mr-2">⚙️</span>
+                  <Link href="/settings/configuration" className="w-full">
+                    Configuración
+                  </Link>
+                </DropdownItem>
+                <DropdownItem key="logout" onClick={handleLogout}>
+                  <span className="mr-2">🚪</span>
+                  <span>Cerrar sesión</span>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarContent>
+        </HeroUINavbar>
+      </>
+    )
   }
-};
+}
+
