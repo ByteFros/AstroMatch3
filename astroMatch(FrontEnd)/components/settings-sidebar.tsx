@@ -2,17 +2,19 @@
 
 import { Link } from "@heroui/link"
 import { usePathname } from "next/navigation"
+import ProfileIcon from "@/app/icons/profile-icon"
+import ConfigIcon from "@/app/icons/config-icon"
 
 const navItems = [
   {
     title: "Perfil",
     href: "/settings/profile",
-    icon: "👤", // Emoji como placeholder para User
+    icon: ProfileIcon,
   },
   {
     title: "Configuración",
     href: "/settings/configuration",
-    icon: "⚙️", // Emoji como placeholder para Settings
+    icon: ConfigIcon,
   },
 ]
 
@@ -31,7 +33,7 @@ export function SettingsSidebar() {
               pathname === item.href ? "bg-primary text-primary-foreground" : "hover:bg-muted"
             }`}
           >
-            <span className="text-lg">{item.icon}</span>
+            <item.icon size={20} />
             <span>{item.title}</span>
           </Link>
         ))}

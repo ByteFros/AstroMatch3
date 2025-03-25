@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import CheckmarkIcon from "@/app/icons/checkmark-icon"
-import CloseIcon from "@/app/icons/close-icon"
+import CheckIcon from "@/app/icons/check-icon"
+import CloseXIcon from "@/app/icons/close-x-icon"
 import Image from "next/image"
 import { motion, useAnimation, type PanInfo } from "framer-motion"
 
@@ -87,44 +87,44 @@ export default function SwipeInterface() {
         </div>
       )}
 
-<motion.div
-  className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden shadow-xl z-10"
-  drag="x"
-  dragConstraints={constraintsRef}
-  onDragEnd={handleDragEnd}
-  animate={controls}
->
-  <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
-    <Image
-      src={`http://localhost:8080${currentProfile.profileImageUrl}`}
-      alt={currentProfile.username || "Perfil sin nombre"}
-      fill
-      className="object-cover"
-      priority
-      draggable={false}  // Agrega esta línea
-    />
+      <motion.div
+        className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden shadow-xl z-10"
+        drag="x"
+        dragConstraints={constraintsRef}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+      >
+        <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
+          <Image
+            src={`http://localhost:8080${currentProfile.profileImageUrl}`}
+            alt={currentProfile.username || "Perfil sin nombre"}
+            fill
+            className="object-cover"
+            priority
+            draggable={false}
+          />
 
-    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-      <h2 className="text-2xl font-bold">
-        {currentProfile.username}, {currentProfile.age}
-      </h2>
-      <p className="mt-2">{currentProfile.bio}</p>
-      <p className="mt-2 text-lg">✨ Compatibilidad: {currentProfile.compatibility}%</p> {/* ✅ Mostrar compatibilidad */}
-    </div>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+            <h2 className="text-2xl font-bold">
+              {currentProfile.username}, {currentProfile.age}
+            </h2>
+            <p className="mt-2">{currentProfile.bio}</p>
+            <p className="mt-2 text-lg">✨ Compatibilidad: {currentProfile.compatibility}%</p>
+          </div>
 
-    {direction === "right" && (
-      <div className="absolute top-8 right-8 bg-green-500 text-white p-2 rounded-full border-4 border-white transform rotate-12">
-        
-      </div>
-    )}
+          {direction === "right" && (
+            <div className="absolute top-8 right-8 bg-green-500 text-white p-2 rounded-full border-4 border-white transform rotate-12">
+              <CheckIcon size={32} />
+            </div>
+          )}
 
-    {direction === "left" && (
-      <div className="absolute top-8 left-8 bg-red-500 text-white p-2 rounded-full border-4 border-white transform -rotate-12">
-        
-      </div>
-    )}
-  </div>
-</motion.div>
+          {direction === "left" && (
+            <div className="absolute top-8 left-8 bg-red-500 text-white p-2 rounded-full border-4 border-white transform -rotate-12">
+              <CloseXIcon size={32} />
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       <div className="absolute bottom-[-80px] left-0 right-0 flex justify-center gap-8 z-20">
         <button
@@ -132,14 +132,14 @@ export default function SwipeInterface() {
           className="bg-red-500 hover:bg-red-600 text-white rounded-full p-4 shadow-lg transition-all"
           aria-label="Dislike"
         >
-          <CloseIcon size={32} />
+          <CloseXIcon size={32} />
         </button>
         <button
           onClick={() => handleSwipe("right")}
           className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all"
           aria-label="Like"
         >
-          <CheckmarkIcon size={32} />
+          <CheckIcon size={32} />
         </button>
       </div>
     </div>

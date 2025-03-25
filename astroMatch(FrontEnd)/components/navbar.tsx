@@ -20,6 +20,12 @@ import { useState, useEffect } from "react"
 import { useAuthStore } from "@/store/authStore"
 import { usePathname, useRouter } from "next/navigation"
 import MatchesIcon from "@/app/icons/matches-icon"
+import DashboardIcon from "@/app/icons/dashboard-icon"
+import MatchesCardIcon from "@/app/icons/matches-card-icon"
+import ChatBubbleIcon from "@/app/icons/chat-bubble-icon"
+import ProfileIcon from "@/app/icons/profile-icon"
+import ConfigIcon from "@/app/icons/config-icon"
+import LogoutIcon from "@/app/icons/logout-icon"
 
 const checkLoginStatus = async () => {
   const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
@@ -98,8 +104,8 @@ export const Navbar = () => {
     )
   } else {
     const filteredNavItems = [
-      { href: "/dashboard", label: "Dashboard", icon: "📊" },
-      { href: "/matches", label: "Matches", icon: "🎴" },
+      { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
+      { href: "/matches", label: "Matches", icon: MatchesCardIcon },
     ]
 
     return (
@@ -120,7 +126,7 @@ export const Navbar = () => {
                     pathname === item.href ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
-                  <span className="mr-2">{item.icon}</span>
+                  <item.icon size={18} className="mr-2" />
                   {item.label}
                 </Link>
               </NavbarItem>
@@ -132,7 +138,7 @@ export const Navbar = () => {
                   pathname === "/chat" ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <span className="mr-2">💬</span>
+                <ChatBubbleIcon size={18} className="mr-2" />
                 Chat
               </Link>
             </NavbarItem>
@@ -171,19 +177,19 @@ export const Navbar = () => {
                   </div>
                 </DropdownItem>
                 <DropdownItem key="profile">
-                  <span className="mr-2">👤</span>
+                  <ProfileIcon size={18} className="mr-2" />
                   <Link href="/settings/profile" className="w-full">
                     Perfil
                   </Link>
                 </DropdownItem>
                 <DropdownItem key="configuration">
-                  <span className="mr-2">⚙️</span>
+                  <ConfigIcon size={18} className="mr-2" />
                   <Link href="/settings/configuration" className="w-full">
                     Configuración
                   </Link>
                 </DropdownItem>
                 <DropdownItem key="logout" onClick={handleLogout}>
-                  <span className="mr-2">🚪</span>
+                  <LogoutIcon size={18} className="mr-2" />
                   <span>Cerrar sesión</span>
                 </DropdownItem>
               </DropdownMenu>
