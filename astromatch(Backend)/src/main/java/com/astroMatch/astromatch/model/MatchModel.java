@@ -30,4 +30,5 @@ public class MatchModel {
     @Column(nullable = false)
     private boolean isMatched;
 
+
 }

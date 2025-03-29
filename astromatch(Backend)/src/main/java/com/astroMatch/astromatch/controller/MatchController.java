@@ -1,5 +1,8 @@
+// File: MatchController.java
 package com.astroMatch.astromatch.controller;
 
+import com.astroMatch.astromatch.dto.PendingLikeDTO;
+import com.astroMatch.astromatch.dto.UserMatchDTO;
 import com.astroMatch.astromatch.model.UserModel;
 import com.astroMatch.astromatch.repository.UserRepository;
 import com.astroMatch.astromatch.service.MatchService;
@@ -15,14 +18,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users/matches")
+@RequestMapping("/api/matches")
 public class MatchController {
 
     private final MatchService matchService;
     private final UserRepository userRepository;
     private final UserService userService;
 
-    // Constructor actualizado
     public MatchController(MatchService matchService,
                            UserRepository userRepository,
                            UserService userService) {
@@ -31,11 +33,10 @@ public class MatchController {
         this.userService = userService;
     }
 
-    // Metodo Matches para recoger las funcionalidades
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getUserMatches(
+    public ResponseEntity<List<UserMatchDTO>> getUserMatches(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "80") int minCompatibility) {
+            @RequestParam(defaultValue = "20") int minCompatibility) {
 
         Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
 
@@ -43,16 +44,20 @@ public class MatchController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        String userSign = user.get().getZodiacSign();
-        String preferredGender = user.get().getPreferredGender();
-
-        List<Map<String, Object>> matches = userService.findMatchesByZodiac(userSign, minCompatibility, preferredGender);
+        List<UserMatchDTO> matches = matchService.getCompatibleMatches(user.get(), minCompatibility);
         return ResponseEntity.ok(matches);
     }
 
-    @PostMapping("/{userId1}/{userId2}")
-    public ResponseEntity<Map<String, String>> createMatch(@PathVariable Long userId1, @PathVariable Long userId2) {
-        String message = matchService.createMatch(userId1, userId2);
+    @PostMapping("/{targetUserId}")
+    public ResponseEntity<Map<String, String>> createMatch(@AuthenticationPrincipal UserDetails userDetails,
+                                                           @PathVariable Long targetUserId) {
+        Optional<UserModel> sourceUser = userRepository.findByUsername(userDetails.getUsername());
+
+        if (sourceUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String message = matchService.createMatch(sourceUser.get().getId(), targetUserId);
         return ResponseEntity.ok(Map.of("message", message));
     }
 
@@ -61,4 +66,49 @@ public class MatchController {
         boolean isMutual = matchService.isMutualMatch(userId1, userId2);
         return ResponseEntity.ok(Map.of("match", isMutual));
     }
+
+    @GetMapping("/pending-likes")
+    public ResponseEntity<List<PendingLikeDTO>> getPendingLikes(@AuthenticationPrincipal UserDetails userDetails) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = userOpt.get().getId();
+        List<PendingLikeDTO> pendingLikes = matchService.getPendingLikes(userId);
+        return ResponseEntity.ok(pendingLikes);
+    }
+
+    @GetMapping("/mutual")
+    public ResponseEntity<List<UserMatchDTO>> getMutualMatches(@AuthenticationPrincipal UserDetails userDetails) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<UserMatchDTO> mutuals = matchService.getMutualMatches(userOpt.get());
+        return ResponseEntity.ok(mutuals);
+    }
+
+    @PostMapping("/dislike/{targetUserId}")
+    public ResponseEntity<Void> dislikeUser(@AuthenticationPrincipal UserDetails userDetails,
+                                            @PathVariable Long targetUserId) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        matchService.dislikeUser(userOpt.get().getId(), targetUserId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/likes")
+    public ResponseEntity<List<UserMatchDTO>> getAllLikedUsers(@AuthenticationPrincipal UserDetails userDetails) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<UserMatchDTO> likedUsers = matchService.getAllLikedUsers(userOpt.get());
+        return ResponseEntity.ok(likedUsers);
+    }
+
 }
