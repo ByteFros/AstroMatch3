@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Permitir login y registro
                         .requestMatchers("/uploads/**").permitAll() // Permitir acceso a imágenes
+                        .requestMatchers("/api/matches/**").authenticated() // Permitir acceso a matches
                        
                         .anyRequest().authenticated()
                 )

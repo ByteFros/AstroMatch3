@@ -14,10 +14,12 @@ export default function SwipeInterface() {
   const constraintsRef = useRef(null)
 
   useEffect(() => {
-    async function fetchProfiles() {
-      const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token")
+    if (!token) return
+  
+    const fetchProfiles = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/matches", {
+        const response = await fetch("http://localhost:8080/api/matches", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -26,13 +28,21 @@ export default function SwipeInterface() {
         })
         const data = await response.json()
         setProfiles(data)
+        setCurrentIndex(0) // Reiniciar para mostrar desde el principio
       } catch (error) {
         console.error("Error fetching profiles:", error)
       }
     }
+  
+    // Primera carga
     fetchProfiles()
+  
+    // Intervalo de 60s
+    const intervalId = setInterval(fetchProfiles, 60000)
+  
+    return () => clearInterval(intervalId)
   }, [])
-
+  
   if (profiles.length === 0) {
     return <div className="text-center text-xl">No more profiles to show!</div>
   }
@@ -41,24 +51,58 @@ export default function SwipeInterface() {
   const nextProfile = profiles[currentIndex + 1]
 
   const handleSwipe = async (direction: string) => {
+    const token = localStorage.getItem("token")
+    const currentUserId = currentProfile.id
+  
+    if (!token || !currentUserId) return
+  
+    const isLike = direction === "right"
+    const endpoint = isLike
+      ? `http://localhost:8080/api/matches/${currentUserId}`
+      : `http://localhost:8080/api/matches/dislike/${currentUserId}`
+  
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+  
+      if (!response.ok) throw new Error("Error en la petición")
+  
+      // Mostrar mensaje del backend solo para likes
+      if (isLike) {
+        const data = await response.json()
+        if (data?.message) {
+          console.log(data.message)
+        }
+      }
+    } catch (error) {
+      console.error("Error handling swipe:", error)
+      alert("Hubo un error al procesar tu acción.")
+    }
+  
     const xMove = direction === "right" ? 600 : -600
     setDirection(direction)
-
+  
     await controls.start({
       x: xMove,
       rotate: direction === "right" ? 30 : -30,
       transition: { duration: 0.5 },
     })
-
+  
     if (currentIndex < profiles.length - 1) {
       setCurrentIndex((prev) => prev + 1)
     } else {
-      setCurrentIndex(0)
+      setProfiles([]) // 🔁 Esto activa el mensaje "No more profiles"
     }
-
+    
     controls.start({ x: 0, rotate: 0, transition: { duration: 0 } })
     setDirection(null)
   }
+  
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = 100
