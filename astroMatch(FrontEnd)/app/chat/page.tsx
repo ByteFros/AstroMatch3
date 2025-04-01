@@ -39,10 +39,7 @@ export default function ChatPage() {
   const [activeConversation, setActiveConversation] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
-  const [currentUser, setCurrentUser] = useState<{ id: string; username: string }>({
-    id: "current-user",
-    username: "You",
-  })
+  const [currentUser, setCurrentUser] = useState<{ id: string; username: string }>({ id: "", username: "" })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -63,29 +60,19 @@ export default function ChatPage() {
 
       try {
         const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
-
         const data = await response.json()
-        if (data.isLoggedIn) {
-          setIsLoggedIn(true)
-          // Load conversations
-          loadDemoData()
+        if (!data.isLoggedIn) throw new Error()
 
-          // Check if there's a conversation ID in the URL
-          const conversationId = searchParams?.get("id")
-          if (conversationId) {
-            setActiveConversation(conversationId)
-          }
-        } else {
-          localStorage.removeItem("token")
-          router.push("/")
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error)
+        const meRes = await fetch("http://localhost:8080/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const me = await meRes.json()
+        setCurrentUser({ id: me.id.toString(), username: me.username })
+        setIsLoggedIn(true)
+        await loadConversations()
+      } catch {
         localStorage.removeItem("token")
         router.push("/")
       } finally {
@@ -96,219 +83,63 @@ export default function ChatPage() {
     checkLoginStatus()
   }, [router, searchParams])
 
-  // Load demo data
-  const loadDemoData = () => {
-    // Demo conversations
-    const demoConversations: Conversation[] = [
-      {
-        id: "1",
-        user: {
-          id: "user1",
-          username: "Laura",
-          profileImageUrl: "/placeholder.svg?height=100&width=100",
-          isOnline: true,
-        },
-        unreadCount: 2,
+  // Load conversations from API
+  const loadConversations = async () => {
+    const token = localStorage.getItem("token")
+    const res = await fetch("http://localhost:8080/api/matches/confirmed", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    const mapped: Conversation[] = data.map((user: any) => ({
+      id: user.id.toString(),
+      user: {
+        id: user.id.toString(),
+        username: user.username,
+        profileImageUrl: user.profileImageUrl,
+        isOnline: true,
       },
-      {
-        id: "2",
-        user: {
-          id: "user2",
-          username: "Carlos",
-          profileImageUrl: "/placeholder.svg?height=100&width=100",
-          isOnline: false,
-          lastActive: "Hace 3 horas",
-        },
-        unreadCount: 0,
-      },
-      {
-        id: "3",
-        user: {
-          id: "user3",
-          username: "Sofía",
-          profileImageUrl: "/placeholder.svg?height=100&width=100",
-          isOnline: true,
-        },
-        unreadCount: 5,
-      },
-      {
-        id: "4",
-        user: {
-          id: "user4",
-          username: "Miguel",
-          profileImageUrl: "/placeholder.svg?height=100&width=100",
-          isOnline: false,
-          lastActive: "Hace 1 día",
-        },
-        unreadCount: 0,
-      },
-    ]
+      unreadCount: 0,
+    }))
+    setConversations(mapped)
 
-    // Demo messages for conversation 1
-    const demoMessages: Record<string, Message[]> = {
-      "1": [
-        {
-          id: "msg1",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "¡Hola! ¿Cómo estás hoy?",
-          timestamp: "2023-06-15T10:30:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg2",
-          senderId: currentUser.id,
-          receiverId: "user1",
-          content: "¡Hola Laura! Estoy muy bien, gracias por preguntar. ¿Y tú?",
-          timestamp: "2023-06-15T10:32:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg3",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "Todo genial. Me encantó ver que tenemos tanta compatibilidad astrológica.",
-          timestamp: "2023-06-15T10:35:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg4",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "¿Te gustaría quedar algún día para tomar un café?",
-          timestamp: "2023-06-15T10:36:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg5",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "Conozco un lugar muy bonito en el centro.",
-          timestamp: "2023-06-15T10:37:00Z",
-          isRead: false,
-        },
-      ],
-      "2": [
-        {
-          id: "msg6",
-          senderId: "user2",
-          receiverId: currentUser.id,
-          content: "Hey, vi que te gusta la música. ¿Qué tipo de música escuchas?",
-          timestamp: "2023-06-14T18:20:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg7",
-          senderId: currentUser.id,
-          receiverId: "user2",
-          content: "¡Hola Carlos! Me gusta de todo un poco, pero especialmente el rock y el indie. ¿Y tú?",
-          timestamp: "2023-06-14T18:25:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg8",
-          senderId: "user2",
-          receiverId: currentUser.id,
-          content: "¡Genial! También me encanta el rock. ¿Has escuchado el nuevo álbum de Arctic Monkeys?",
-          timestamp: "2023-06-14T18:30:00Z",
-          isRead: true,
-        },
-      ],
-      "3": [
-        {
-          id: "msg9",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "¡Hola! Acabo de ver que tenemos un 95% de compatibilidad. ¡Eso es increíble!",
-          timestamp: "2023-06-15T09:10:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg10",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "Me encantaría conocerte mejor.",
-          timestamp: "2023-06-15T09:11:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg11",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "¿Qué te parece si hablamos un poco sobre nuestros intereses?",
-          timestamp: "2023-06-15T09:12:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg12",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "Yo adoro el arte y la fotografía.",
-          timestamp: "2023-06-15T09:13:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg13",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "También me encanta viajar. ¿Has viajado mucho?",
-          timestamp: "2023-06-15T09:14:00Z",
-          isRead: false,
-        },
-      ],
-      "4": [
-        {
-          id: "msg14",
-          senderId: currentUser.id,
-          receiverId: "user4",
-          content: "Hola Miguel, vi que te gusta el deporte. Yo también soy bastante deportista.",
-          timestamp: "2023-06-13T14:20:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg15",
-          senderId: "user4",
-          receiverId: currentUser.id,
-          content: "¡Hola! Sí, me encanta. Practico fútbol y natación principalmente. ¿Qué deportes te gustan a ti?",
-          timestamp: "2023-06-13T14:30:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg16",
-          senderId: currentUser.id,
-          receiverId: "user4",
-          content: "Me gusta correr y el yoga. También juego al tenis de vez en cuando.",
-          timestamp: "2023-06-13T14:35:00Z",
-          isRead: true,
-        },
-      ],
-    }
-
-    setConversations(demoConversations)
-
-    // Set messages for active conversation if any
-    if (activeConversation && demoMessages[activeConversation]) {
-      setMessages(demoMessages[activeConversation])
+    const conversationId = searchParams?.get("id")
+    if (conversationId) {
+      await selectConversation(conversationId)
     }
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeConversation) return
 
-    const conversation = conversations.find((c) => c.id === activeConversation)
-    if (!conversation) return
+    const token = localStorage.getItem("token")
+    const res = await fetch("http://localhost:8080/api/users/messages/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        senderId: currentUser.id,
+        receiverId: activeConversation,
+        content: newMessage.trim(),
+      }),
+    })
 
-    const newMsg: Message = {
-      id: `msg-${Date.now()}`,
-      senderId: currentUser.id,
-      receiverId: conversation.user.id,
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      isRead: false,
+    if (res.ok) {
+      const newMsg: Message = {
+        id: `msg-${Date.now()}`,
+        senderId: currentUser.id,
+        receiverId: activeConversation,
+        content: newMessage.trim(),
+        timestamp: new Date().toISOString(),
+        isRead: false,
+      }
+      setMessages((prev) => [...prev, newMsg])
+      setNewMessage("")
+    } else {
+      const error = await res.text()
+      alert("Error al enviar mensaje: " + error)
     }
-
-    setMessages((prev) => [...prev, newMsg])
-    setNewMessage("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -318,158 +149,17 @@ export default function ChatPage() {
     }
   }
 
-  const selectConversation = (conversationId: string) => {
+  const selectConversation = async (conversationId: string) => {
     setActiveConversation(conversationId)
-
-    // In a real app, you would fetch messages for this conversation from the API
-    // For demo, we'll use our demo data
-    const demoMessages: Record<string, Message[]> = {
-      "1": [
-        {
-          id: "msg1",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "¡Hola! ¿Cómo estás hoy?",
-          timestamp: "2023-06-15T10:30:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg2",
-          senderId: currentUser.id,
-          receiverId: "user1",
-          content: "¡Hola Laura! Estoy muy bien, gracias por preguntar. ¿Y tú?",
-          timestamp: "2023-06-15T10:32:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg3",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "Todo genial. Me encantó ver que tenemos tanta compatibilidad astrológica.",
-          timestamp: "2023-06-15T10:35:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg4",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "¿Te gustaría quedar algún día para tomar un café?",
-          timestamp: "2023-06-15T10:36:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg5",
-          senderId: "user1",
-          receiverId: currentUser.id,
-          content: "Conozco un lugar muy bonito en el centro.",
-          timestamp: "2023-06-15T10:37:00Z",
-          isRead: false,
-        },
-      ],
-      "2": [
-        {
-          id: "msg6",
-          senderId: "user2",
-          receiverId: currentUser.id,
-          content: "Hey, vi que te gusta la música. ¿Qué tipo de música escuchas?",
-          timestamp: "2023-06-14T18:20:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg7",
-          senderId: currentUser.id,
-          receiverId: "user2",
-          content: "¡Hola Carlos! Me gusta de todo un poco, pero especialmente el rock y el indie. ¿Y tú?",
-          timestamp: "2023-06-14T18:25:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg8",
-          senderId: "user2",
-          receiverId: currentUser.id,
-          content: "¡Genial! También me encanta el rock. ¿Has escuchado el nuevo álbum de Arctic Monkeys?",
-          timestamp: "2023-06-14T18:30:00Z",
-          isRead: true,
-        },
-      ],
-      "3": [
-        {
-          id: "msg9",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "¡Hola! Acabo de ver que tenemos un 95% de compatibilidad. ¡Eso es increíble!",
-          timestamp: "2023-06-15T09:10:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg10",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "Me encantaría conocerte mejor.",
-          timestamp: "2023-06-15T09:11:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg11",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "¿Qué te parece si hablamos un poco sobre nuestros intereses?",
-          timestamp: "2023-06-15T09:12:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg12",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "Yo adoro el arte y la fotografía.",
-          timestamp: "2023-06-15T09:13:00Z",
-          isRead: false,
-        },
-        {
-          id: "msg13",
-          senderId: "user3",
-          receiverId: currentUser.id,
-          content: "También me encanta viajar. ¿Has viajado mucho?",
-          timestamp: "2023-06-15T09:14:00Z",
-          isRead: false,
-        },
-      ],
-      "4": [
-        {
-          id: "msg14",
-          senderId: currentUser.id,
-          receiverId: "user4",
-          content: "Hola Miguel, vi que te gusta el deporte. Yo también soy bastante deportista.",
-          timestamp: "2023-06-13T14:20:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg15",
-          senderId: "user4",
-          receiverId: currentUser.id,
-          content: "¡Hola! Sí, me encanta. Practico fútbol y natación principalmente. ¿Qué deportes te gustan a ti?",
-          timestamp: "2023-06-13T14:30:00Z",
-          isRead: true,
-        },
-        {
-          id: "msg16",
-          senderId: currentUser.id,
-          receiverId: "user4",
-          content: "Me gusta correr y el yoga. También juego al tenis de vez en cuando.",
-          timestamp: "2023-06-13T14:35:00Z",
-          isRead: true,
-        },
-      ],
-    }
-
-    if (demoMessages[conversationId]) {
-      setMessages(demoMessages[conversationId])
-    } else {
-      setMessages([])
-    }
-
-    // Update unread count
-    setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv)))
+    const token = localStorage.getItem("token")
+    const res = await fetch(`http://localhost:8080/api/users/messages/chat/${currentUser.id}/${conversationId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const msgs = await res.json()
+    setMessages(msgs)
+    setConversations((prev) =>
+      prev.map((conv) => (conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv))
+    )
   }
 
   const formatMessageTime = (timestamp: string) => {
@@ -678,4 +368,3 @@ export default function ChatPage() {
     </div>
   )
 }
-
