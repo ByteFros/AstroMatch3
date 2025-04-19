@@ -2,6 +2,7 @@ package com.astroMatch.astromatch.security;
 
 import java.util.Arrays;
 
+import com.astroMatch.astromatch.security.jwt.components.LastActiveFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +40,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, LastActiveFilter lastActiveFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Deshabilita CSRF para permitir peticiones desde el frontend
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -48,10 +49,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Permitir login y registro
                         .requestMatchers("/uploads/**").permitAll() // Permitir acceso a imágenes
                         .requestMatchers("/api/matches/**").authenticated() // Permitir acceso a matches
+                        .requestMatchers("/api/users/**").authenticated() // Permitir acceso a usuarios
                        
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // 🔥 AGREGAR EL FILTRO JWT
+                .addFilterBefore(lastActiveFilter, UsernamePasswordAuthenticationFilter.class) // Filtro para actualizar lastActive
                 .formLogin(form -> form.disable()) // Deshabilita login por formulario
                 .httpBasic(basic -> basic.disable()); // Deshabilita autenticación básica
 

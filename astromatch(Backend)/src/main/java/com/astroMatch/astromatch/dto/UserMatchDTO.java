@@ -1,6 +1,17 @@
 // src/main/java/com/astroMatch/astromatch/dto/UserMatchDTO.java
 package com.astroMatch.astromatch.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserMatchDTO {
     private Long id;
     private String username;
@@ -9,22 +20,8 @@ public class UserMatchDTO {
     private String bio;
     private int compatibility;
     private boolean isMutual;
+    private LocalDateTime lastActive;
+    private boolean isOnline;
 
-    public UserMatchDTO(Long id, String username, int age, String profileImageUrl, String bio, int compatibility, boolean isMutual) {
-        this.id = id;
-        this.username = username;
-        this.age = age;
-        this.profileImageUrl = profileImageUrl;
-        this.bio = bio;
-        this.compatibility = compatibility;
-        this.isMutual = isMutual;
-    }
 
-    public Long getId() { return id; }
-    public String getUsername() { return username; }
-    public int getAge() { return age; }
-    public String getProfileImageUrl() { return profileImageUrl; }
-    public String getBio() { return bio; }
-    public int getCompatibility() { return compatibility; }
-    public boolean isMutual() { return isMutual; }
 }

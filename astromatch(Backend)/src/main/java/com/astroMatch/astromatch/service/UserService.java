@@ -1,10 +1,12 @@
 package com.astroMatch.astromatch.service;
 
+import com.astroMatch.astromatch.dto.UserDTO;
 import com.astroMatch.astromatch.model.Role;
 import com.astroMatch.astromatch.model.UserModel;
 import com.astroMatch.astromatch.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,20 @@ public class UserService {
         this.userRepository = userRepository;
         this.zodiacService = zodiacService;
 
+    }
+
+    public UserDTO toUserDTO(UserModel u) {
+        UserDTO dto = new UserDTO();
+        dto.setId(u.getId());
+        dto.setUsername(u.getUsername());
+        dto.setProfileImageUrl(u.getProfileImageUrl());
+        dto.setLastActive(u.getLastActive());
+        // Online si actividad en últimos 5 minutos
+        boolean online =
+                u.getLastActive() != null &&
+                        u.getLastActive().isAfter(LocalDateTime.now().minusMinutes(5));
+        dto.setOnline(online);
+        return dto;
     }
 
     public List<UserModel> getAllUserUsers(){

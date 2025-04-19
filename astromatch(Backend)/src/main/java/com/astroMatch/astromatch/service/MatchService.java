@@ -9,6 +9,7 @@ import com.astroMatch.astromatch.repository.MatchRepository;
 import com.astroMatch.astromatch.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -107,63 +108,85 @@ public class MatchService {
                 })
                 .map(user -> {
                     int compatibility = zodiacService.getCompatibility(currentSign, user.getZodiacSign());
-                    return new UserMatchDTO(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getAge(),
-                            user.getProfileImageUrl(),
-                            user.getBio(),
-                            compatibility,
-                            false
-                    );
+
+                    return UserMatchDTO.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .age(user.getAge())
+                            .profileImageUrl(user.getProfileImageUrl())
+                            .bio(user.getBio())
+                            .compatibility(compatibility)
+                            .isMutual(false)
+                            .build();
                 })
                 .filter(dto -> dto.getCompatibility() >= minCompatibility)
                 .collect(Collectors.toList());
     }
 
     public List<UserMatchDTO> getMutualMatches(UserModel currentUser) {
-        List<MatchModel> sentMatches = matchRepository.findByUser1AndIsMatchedFalse(currentUser);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
-        return sentMatches.stream()
+        return matchRepository.findByUser1AndIsMatchedFalse(currentUser).stream()
                 .map(MatchModel::getUser2)
-                .map(user -> new UserMatchDTO(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getAge(),
-                        user.getProfileImageUrl(),
-                        user.getBio(),
-                        zodiacService.getCompatibility(currentUser.getZodiacSign(), user.getZodiacSign()),
-                        true
-                ))
+                .map(other -> {
+                    int compatibility = zodiacService
+                            .getCompatibility(currentUser.getZodiacSign(), other.getZodiacSign());
+
+                    LocalDateTime lastActive = other.getLastActive();
+                    boolean isOnline = lastActive != null
+                            && lastActive.isAfter(threshold);
+
+                    return UserMatchDTO.builder()
+                            .id(other.getId())
+                            .username(other.getUsername())
+                            .age(other.getAge())
+                            .profileImageUrl(other.getProfileImageUrl())
+                            .bio(other.getBio())
+                            .compatibility(compatibility)
+                            .isMutual(true)
+                            .lastActive(lastActive)
+                            .isOnline(isOnline)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
-// File: MatchService.java
 
     public List<UserMatchDTO> getAllLikedUsers(UserModel user) {
-        List<MatchModel> likes = matchRepository.findByUser1(user);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
-        Set<Long> seenUserIds = new HashSet<>();
-
-        return likes.stream()
-                .filter(match -> seenUserIds.add(match.getUser2().getId())) // solo deja pasar si no se ha visto
+        return matchRepository.findByUser1(user).stream()
+                // solo el primer like de cada user2
+                .filter(match -> {
+                    return new HashSet<Long>() {{
+                        add(match.getUser2().getId());
+                    }}.add(match.getUser2().getId());
+                })
                 .map(match -> {
                     UserModel likedUser = match.getUser2();
-                    int compatibility = zodiacService.getCompatibility(user.getZodiacSign(), likedUser.getZodiacSign());
+                    int compatibility = zodiacService
+                            .getCompatibility(user.getZodiacSign(), likedUser.getZodiacSign());
 
-                    boolean isMutual = matchRepository.findByUser1AndUser2(likedUser, user)
+                    boolean isMutual = matchRepository
+                            .findByUser1AndUser2(likedUser, user)
                             .map(MatchModel::isMatched)
                             .orElse(false);
 
-                    return new UserMatchDTO(
-                            likedUser.getId(),
-                            likedUser.getUsername(),
-                            likedUser.getAge(),
-                            likedUser.getProfileImageUrl(),
-                            likedUser.getBio(),
-                            compatibility,
-                            isMutual
-                    );
+                    LocalDateTime lastActive = likedUser.getLastActive();
+                    boolean isOnline = lastActive != null
+                            && lastActive.isAfter(threshold);
+
+                    return UserMatchDTO.builder()
+                            .id(likedUser.getId())
+                            .username(likedUser.getUsername())
+                            .age(likedUser.getAge())
+                            .profileImageUrl(likedUser.getProfileImageUrl())
+                            .bio(likedUser.getBio())
+                            .compatibility(compatibility)
+                            .isMutual(isMutual)
+                            .lastActive(lastActive)
+                            .isOnline(isOnline)
+                            .build();
                 })
                 .collect(Collectors.toList());
     }
@@ -183,4 +206,32 @@ public class MatchService {
         return userRepository.findByUsername(username);
     }
 
+    public List<UserMatchDTO> getConfirmedMatches(UserModel currentUser) {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
+
+        return matchRepository.findByIsMatchedTrueAndUser1OrUser2(currentUser, currentUser)
+                .stream()
+                .map(match -> {
+                    UserModel other = match.getUser1().equals(currentUser)
+                            ? match.getUser2()
+                            : match.getUser1();
+
+                    boolean online = other.getLastActive() != null
+                            && other.getLastActive().isAfter(threshold);
+
+                    return UserMatchDTO.builder()
+                            .id(other.getId())
+                            .username(other.getUsername())
+                            .age(other.getAge())
+                            .profileImageUrl(other.getProfileImageUrl())
+                            .bio(other.getBio())
+                            .compatibility(zodiacService.getCompatibility(
+                                    currentUser.getZodiacSign(), other.getZodiacSign()))
+                            .isMutual(true)
+                            .lastActive(other.getLastActive())
+                            .isOnline(online)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 }

@@ -1,5 +1,6 @@
 package com.astroMatch.astromatch.controller;
 
+import com.astroMatch.astromatch.dto.MessageDTO;
 import com.astroMatch.astromatch.model.MessageModel;
 import com.astroMatch.astromatch.service.MessageService;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,22 @@ public class MessageController {
         }
     }
 
+
     @GetMapping("/chat/{user1Id}/{user2Id}")
-    public ResponseEntity<List<MessageModel>> getChat(@PathVariable Long user1Id, @PathVariable Long user2Id) {
-        return ResponseEntity.ok(messageService.getChat(user1Id, user2Id));
+    public ResponseEntity<List<MessageDTO>> getChat(
+            @PathVariable Long user1Id,
+            @PathVariable Long user2Id) {
+        return ResponseEntity.ok(
+                messageService.getChat(user1Id, user2Id)
+        );
+    }
+
+
+    @PostMapping("/chat/{user1Id}/{user2Id}/read")
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long user1Id,
+            @PathVariable Long user2Id) {
+        messageService.markAsRead(user1Id, user2Id);
+        return ResponseEntity.ok().build();
     }
 }

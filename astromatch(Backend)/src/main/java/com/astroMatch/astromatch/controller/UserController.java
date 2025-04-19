@@ -1,3 +1,4 @@
+// File: UserController.java
 package com.astroMatch.astromatch.controller;
 
 import com.astroMatch.astromatch.model.UserModel;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,16 +25,41 @@ public class UserController {
     private final CsvImportService csvImportService;
     private final UserRepository userRepository;
 
-    public UserController(UserService userService, CsvImportService csvImportService, UserRepository userRepository)
-    {
+    public UserController(UserService userService, CsvImportService csvImportService, UserRepository userRepository) {
         this.userService = userService;
         this.csvImportService = csvImportService;
         this.userRepository = userRepository;
+    }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserModel> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserModel> updateCurrentUser(@AuthenticationPrincipal UserDetails userDetails,
+                                                       @RequestBody UserModel updates) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        UserModel user = userOpt.get();
+        user.setUsername(updates.getUsername());
+        user.setEmail(updates.getEmail());
+        user.setBio(updates.getBio());
+        user.setProfileImageUrl(updates.getProfileImageUrl());
+        // Campos opcionales si quieres permitir actualizarlos
+        user.setAge(updates.getAge());
+        user.setGender(updates.getGender());
+        user.setPreferredGender(updates.getPreferredGender());
+        user.setZodiacSign(updates.getZodiacSign());
+
+        userRepository.save(user);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserModel>> getAllUsers(){
+    public ResponseEntity<List<UserModel>> getAllUsers() {
         List<UserModel> users = userService.getAllUserUsers();
         return ResponseEntity.ok(users);
     }
@@ -53,39 +78,14 @@ public class UserController {
     public ResponseEntity<List<?>> getProfiles() {
         List<UserModel> users = userService.getAllUserUsers();
 
-        // Convertir datos para la vista en React
-        List<Object> formattedUsers = users.stream().map(user -> {
-            return new Object() {
-                public final Long id = user.getId();
-                public final String name = user.getUsername();
-                public final int age = user.getAge();
-                public final String image = user.getProfileImageUrl();
-                public final String bio = user.getBio() != null ? user.getBio() : "No bio available";
-            };
+        List<Object> formattedUsers = users.stream().map(user -> new Object() {
+            public final Long id = user.getId();
+            public final String name = user.getUsername();
+            public final int age = user.getAge();
+            public final String image = user.getProfileImageUrl();
+            public final String bio = user.getBio() != null ? user.getBio() : "No bio available";
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(formattedUsers);
     }
-
-
-
-   // @GetMapping("/matches")
-   // public ResponseEntity<List<Map<String, Object>>> getUserMatches(
-    //        @AuthenticationPrincipal UserDetails userDetails,
-     //       @RequestParam(defaultValue = "80") int minCompatibility) {
-
-//        Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
-
-  //      if (user.isEmpty()) {
-    //        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-      //  }
-
-       // String userSign = user.get().getZodiacSign();
-       // String preferredGender = user.get().getPreferredGender();
-
-       // List<Map<String, Object>> matches = userService.findMatchesByZodiac(userSign, minCompatibility, preferredGender);
-       // return ResponseEntity.ok(matches);
-   // }
-
-
 }

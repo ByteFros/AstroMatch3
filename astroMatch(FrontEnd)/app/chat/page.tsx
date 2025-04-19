@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Avatar, Button, Card, CardBody, CardHeader, Divider, Input, Spinner, Chip } from "@heroui/react"
 import SendIcon from "@/app/icons/send-icon"
 import ChatBubbleIcon from "@/app/icons/chat-bubble-icon"
+import { time } from "console"
 
 interface Message {
   id: string
@@ -43,6 +44,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -95,10 +97,18 @@ export default function ChatPage() {
       user: {
         id: user.id.toString(),
         username: user.username,
-        profileImageUrl: user.profileImageUrl,
-        isOnline: true,
-      },
-      unreadCount: 0,
+        profileImageUrl: `${API_URL}${user.profileImageUrl}`,
+        isOnline: user.online,
+        lastActive: user.lastActive
+        ? new Date(user.lastActive).toLocaleString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+          })
+        : undefined,
+    },
+    unreadCount: user.unreadCount ?? 0,
     }))
     setConversations(mapped)
 
@@ -112,6 +122,11 @@ export default function ChatPage() {
     if (!newMessage.trim() || !activeConversation) return
 
     const token = localStorage.getItem("token")
+    console.log("enviando mensaje: ", {
+      senderId: currentUser.id,
+      receiverId: activeConversation,
+    })
+
     const res = await fetch("http://localhost:8080/api/users/messages/send", {
       method: "POST",
       headers: {
@@ -155,8 +170,23 @@ export default function ChatPage() {
     const res = await fetch(`http://localhost:8080/api/users/messages/chat/${currentUser.id}/${conversationId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
+
+
+    if (!res.ok) {
+      console.error("Error cargando mensajes:", res.status, await res.text());
+      alert("No se han podido cargar los mensajes. Código: " + res.status);
+      return;
+    }
     const msgs = await res.json()
-    setMessages(msgs)
+    const mappedMessages: Message[] = msgs.map((m: any) => ({
+      id : String(m.id),
+      senderId: String(m.senderId),
+      receiverId: String(m.receiverId),
+      content: m.content,
+      timestamp: m.timestamp,
+      isRead: m.isRead,
+    }))
+    setMessages(mappedMessages)
     setConversations((prev) =>
       prev.map((conv) => (conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv))
     )
@@ -219,11 +249,10 @@ export default function ChatPage() {
                 {conversations.map((conversation) => (
                   <div
                     key={conversation.id}
-                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-                      activeConversation === conversation.id
+                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${activeConversation === conversation.id
                         ? "bg-primary/10"
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
+                      }`}
                     onClick={() => selectConversation(conversation.id)}
                   >
                     <div className="relative">

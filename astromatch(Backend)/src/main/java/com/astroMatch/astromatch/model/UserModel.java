@@ -3,6 +3,8 @@ package com.astroMatch.astromatch.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -45,4 +47,10 @@ public class UserModel {
 
     @Column(nullable = false)
     private String profileImageUrl;
+
+    @Column(name = "last_active")
+    private LocalDateTime lastActive;
+
+    @Transient
+    private boolean isOnline;
 }

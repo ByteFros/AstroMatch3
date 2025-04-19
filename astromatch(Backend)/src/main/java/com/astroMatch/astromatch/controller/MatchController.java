@@ -33,10 +33,11 @@ public class MatchController {
         this.userService = userService;
     }
 
+    // este endpoint te devuelve los posibles matches que tengas con otros usuarios segun la compatibilidad zodiacalx
     @GetMapping
     public ResponseEntity<List<UserMatchDTO>> getUserMatches(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "20") int minCompatibility) {
+            @RequestParam(defaultValue = "1") int minCompatibility) {
 
         Optional<UserModel> user = userRepository.findByUsername(userDetails.getUsername());
 
@@ -110,5 +111,15 @@ public class MatchController {
         List<UserMatchDTO> likedUsers = matchService.getAllLikedUsers(userOpt.get());
         return ResponseEntity.ok(likedUsers);
     }
+
+    @GetMapping("/confirmed")
+    public ResponseEntity<List<UserMatchDTO>> getConfirmedChats(@AuthenticationPrincipal UserDetails userDetails) {
+        Optional<UserModel> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<UserMatchDTO> confirmedMatches = matchService.getConfirmedMatches(userOpt.get());
+        return ResponseEntity.ok(confirmedMatches);
+    }
+
 
 }
