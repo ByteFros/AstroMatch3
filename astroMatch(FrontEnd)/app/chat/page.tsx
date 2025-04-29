@@ -237,7 +237,7 @@ export default function ChatPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
         {/* Conversations list */}
-        <Card className="lg:col-span-1 h-full">
+        <Card className="lg:col-span-1 h-full bg-[var(--card)]">
           <CardHeader className="pb-0">
             <h2 className="text-xl font-semibold">Conversaciones</h2>
           </CardHeader>
@@ -286,7 +286,7 @@ export default function ChatPage() {
         </Card>
 
         {/* Chat area */}
-        <Card className="lg:col-span-2 h-full flex flex-col">
+        <Card className="lg:col-span-2 h-full flex flex-col bg-[var(--card)]">
           {activeConversation ? (
             <>
               <CardHeader className="pb-2 flex flex-row justify-between items-center">

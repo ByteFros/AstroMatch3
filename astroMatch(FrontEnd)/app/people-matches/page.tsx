@@ -66,7 +66,7 @@ export default function UnifiedMatchesPage() {
   const renderMatches = (matches: Match[], canChat: boolean) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
       {matches.map((match) => (
-        <Card key={match.id} className="border border-gray-200 dark:border-gray-800">
+        <Card key={match.id} className="border border-gray-200 dark:border-gray-800 bg-[var(--card)]">
           <CardBody className="p-0 overflow-hidden">
             <div className="relative h-64 w-full">
               <img
@@ -132,6 +132,7 @@ export default function UnifiedMatchesPage() {
 
       <div className="flex space-x-4 mb-4">
         <Button
+         
           color={activeTab === "confirmed" ? "primary" : "default"}
           onClick={() => setActiveTab("confirmed")}
         >

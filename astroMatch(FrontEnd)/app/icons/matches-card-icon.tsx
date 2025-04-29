@@ -1,34 +1,29 @@
 import type React from "react"
 
-interface IconProps extends React.SVGProps<SVGSVGElement> {
+interface IconProps {
   size?: number
+  className?: string
 }
 
-export default function MatchesCardIcon({ size = 24, ...props }: IconProps) {
+const MatchesCardIcon: React.FC<IconProps> = ({ size = 24, className = "" }) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path
-        d="M19 5V19M19 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H19M19 5H21M19 21H21M5 9H7M5 12H7M5 15H7M5 18H7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M15.5 10C15.5 11.3807 14.3807 12.5 13 12.5C11.6193 12.5 10.5 11.3807 10.5 10C10.5 8.61929 11.6193 7.5 13 7.5C14.3807 7.5 15.5 8.61929 15.5 10Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M17 18.5C17 16.0147 15.2091 14 13 14C10.7909 14 9 16.0147 9 18.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Cartas de tarot */}
+      <rect x="4" y="4" width="12" height="16" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <rect x="8" y="6" width="12" height="16" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <path d="M10 10L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M12 8L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M14 16L18 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="16" cy="13" r="1" fill="currentColor" />
     </svg>
   )
 }
 
+export default MatchesCardIcon

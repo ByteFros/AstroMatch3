@@ -9,6 +9,14 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        background: "var(--background)",
+        primary: "#FFD700",    // Dorado
+        secondary: "#f1db5b", 
+       
+
+
+      },
       fontFamily: {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
@@ -16,5 +24,21 @@ module.exports = {
     },
   },
   darkMode: "class",
-  plugins: [heroui()],
+  plugins: [
+    heroui({
+      themes: {
+        light: {
+          primary: "#FFD700",    // Dorado
+          secondary: "#FFFACD",
+           // Amarillo flojo
+        },
+        dark: {
+          primary: "#FFD700",
+          secondary: "#FFFACD",
+            // Amarillo flojo
+        },
+      },
+    })
+  ],
 }
+
