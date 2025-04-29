@@ -31,8 +31,15 @@ export const Navbar = () => {
   const { openLogin, openRegister, isLoggedIn, user, logout, checkAuth } = useAuthStore()
   const [loading, setLoading] = useState(true)
   const [newMatches, setNewMatches] = useState(3) // Número de nuevos matches (para la notificación)
+  const [userProfile, setUserProfile] = useState<{
+    id: number;
+    username: string;
+    email: string;
+    profileImageUrl: string;
+  } | null>(null)
   const pathname = usePathname()
   const router = useRouter()
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -55,6 +62,9 @@ export const Navbar = () => {
           if (!data.isLoggedIn) {
             // If server says not logged in, but we have local token, logout
             logout()
+          } else {
+            // Fetch user profile data
+            await fetchUserProfile()
           }
         } catch (error) {
           console.error("Error verifying auth status:", error)
@@ -66,6 +76,31 @@ export const Navbar = () => {
 
     verifyAuth()
   }, [checkAuth, logout])
+
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch("http://localhost:8080/api/users/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUserProfile({
+          id: data.id,
+          username: data.username,
+          email: data.email || "No email provided",
+          profileImageUrl: data.profileImageUrl
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -116,6 +151,11 @@ export const Navbar = () => {
       { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
       { href: "/matches", label: "Matches", icon: MatchesCardIcon },
     ]
+
+    // Construct the full avatar URL
+    const avatarUrl = userProfile?.profileImageUrl 
+      ? `${API_URL}${userProfile.profileImageUrl}` 
+      : "/placeholder.svg?height=32&width=32";
 
     return (
       <>
@@ -174,15 +214,15 @@ export const Navbar = () => {
                 <Avatar
                   as="button"
                   className="transition-transform"
-                  src="/placeholder.svg?height=32&width=32"
+                  src={avatarUrl}
                   size="sm"
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Acciones de perfil">
                 <DropdownItem textValue="Información de usuario" className="h-14 gap-2" key="user-info">
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium">{user.username || "Usuario"}</p>
-                    <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
+                    <p className="text-sm font-medium">{userProfile?.username || user.username || "Usuario"}</p>
+                    <p className="text-xs text-gray-500">{userProfile?.email || "usuario@ejemplo.com"}</p>
                   </div>
                 </DropdownItem>
                 <DropdownItem key="profile">
@@ -209,4 +249,3 @@ export const Navbar = () => {
     )
   }
 }
-

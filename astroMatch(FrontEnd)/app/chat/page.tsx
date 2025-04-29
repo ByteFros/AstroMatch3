@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Avatar, Button, Card, CardBody, CardHeader, Divider, Input, Spinner, Chip } from "@heroui/react"
 import SendIcon from "@/app/icons/send-icon"
 import ChatBubbleIcon from "@/app/icons/chat-bubble-icon"
-import { time } from "console"
 
 interface Message {
   id: string
@@ -51,7 +50,7 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // Check if user is logged in
+  // 1) Efecto inicial: cargar user + conversaciones
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = localStorage.getItem("token")
@@ -71,8 +70,12 @@ export default function ChatPage() {
           headers: { Authorization: `Bearer ${token}` },
         })
         const me = await meRes.json()
-        setCurrentUser({ id: me.id.toString(), username: me.username })
+        const myId = me.id.toString()
+        setCurrentUser({ id: myId, username: me.username })
+        console.log("currentUser seteado a ", myId, me.username)
         setIsLoggedIn(true)
+        
+        // Carga solo la lista de conversaciones, sin selectConversation
         await loadConversations()
       } catch {
         localStorage.removeItem("token")
@@ -83,9 +86,9 @@ export default function ChatPage() {
     }
 
     checkLoginStatus()
-  }, [router, searchParams])
+  }, [router])
 
-  // Load conversations from API
+  // 2) loadConversations ya no dispara selectConversation
   const loadConversations = async () => {
     const token = localStorage.getItem("token")
     const res = await fetch("http://localhost:8080/api/matches/confirmed", {
@@ -107,16 +110,20 @@ export default function ChatPage() {
             month: "2-digit",
           })
         : undefined,
-    },
-    unreadCount: user.unreadCount ?? 0,
+      },
+      unreadCount: user.unreadCount ?? 0,
     }))
     setConversations(mapped)
-
-    const conversationId = searchParams?.get("id")
-    if (conversationId) {
-      await selectConversation(conversationId)
-    }
   }
+
+  // 3) Nuevo useEffect: cuando tenga currentUser.id y venga un ?id= en la URL, cargo el chat
+  useEffect(() => {
+    const cid = searchParams?.get("id")
+    if (currentUser.id && cid) {
+      console.log("▷ Cargando chat para userId=", currentUser.id, "y matchId=", cid)
+      selectConversation(cid)
+    }
+  }, [currentUser.id, searchParams])
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeConversation) return
@@ -164,19 +171,26 @@ export default function ChatPage() {
     }
   }
 
+  // 4) selectConversation usa ya currentUser.id relleno
   const selectConversation = async (conversationId: string) => {
+    console.log("Conversación seleccionada:", conversationId)
+    console.log("Usuario actual:", currentUser.id)
     setActiveConversation(conversationId)
+    
     const token = localStorage.getItem("token")
-    const res = await fetch(`http://localhost:8080/api/users/messages/chat/${currentUser.id}/${conversationId}`, {
+    const url = `http://localhost:8080/api/users/messages/chat/${currentUser.id}/${conversationId}`
+    console.log("    fetch URL =", url)
+    
+    const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
-
 
     if (!res.ok) {
       console.error("Error cargando mensajes:", res.status, await res.text());
       alert("No se han podido cargar los mensajes. Código: " + res.status);
       return;
     }
+    
     const msgs = await res.json()
     const mappedMessages: Message[] = msgs.map((m: any) => ({
       id : String(m.id),
@@ -186,6 +200,7 @@ export default function ChatPage() {
       timestamp: m.timestamp,
       isRead: m.isRead,
     }))
+    
     setMessages(mappedMessages)
     setConversations((prev) =>
       prev.map((conv) => (conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv))
