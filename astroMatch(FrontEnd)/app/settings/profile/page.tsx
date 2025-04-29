@@ -74,7 +74,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <Card>
+      <Card className="bg-[var(--card)]">
         <CardHeader className="flex flex-col gap-1">
           <h3 className="text-xl font-semibold">Información del perfil</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">Actualiza tu foto y datos personales.</p>

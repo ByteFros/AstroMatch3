@@ -30,7 +30,7 @@ import LogoutIcon from "@/app/icons/logout-icon"
 export const Navbar = () => {
   const { openLogin, openRegister, isLoggedIn, user, logout, checkAuth } = useAuthStore()
   const [loading, setLoading] = useState(true)
-  const [newMatches, setNewMatches] = useState(3) // Número de nuevos matches (para la notificación)
+  const [newMatches, setNewMatches] = useState(0) // Número de nuevos matches (para la notificación)
   const [userProfile, setUserProfile] = useState<{
     id: number;
     username: string;
@@ -130,12 +130,12 @@ export const Navbar = () => {
           </NavbarContent>
           <NavbarContent justify="end">
             <NavbarItem className="hidden lg:flex">
-              <Button onPress={openLogin} color="secondary" variant="flat">
+              <Button onPress={openLogin} color="secondary" >
                 Login
               </Button>
             </NavbarItem>
             <NavbarItem className="hidden lg:flex">
-              <Button onPress={openRegister} color="primary" variant="flat">
+              <Button onPress={openRegister} color="primary" >
                 Register
               </Button>
             </NavbarItem>
@@ -148,7 +148,7 @@ export const Navbar = () => {
     )
   } else {
     const filteredNavItems = [
-      { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
+      
       { href: "/matches", label: "Matches", icon: MatchesCardIcon },
     ]
 
@@ -159,7 +159,7 @@ export const Navbar = () => {
 
     return (
       <>
-        <HeroUINavbar isBordered isBlurred={false}>
+        <HeroUINavbar className="bg-[var(--navbar)]" isBordered isBlurred={false}>
           <NavbarBrand>
             <Link href="/" className="font-bold text-xl">
               AstroMatch
@@ -180,36 +180,26 @@ export const Navbar = () => {
                 </Link>
               </NavbarItem>
             ))}
-            <NavbarItem isActive={pathname === "/chat"}>
-              <Link
-                href="/chat"
-                className={`flex items-center text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/chat" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <ChatBubbleIcon size={18} className="mr-2" />
-                Chat
-              </Link>
-            </NavbarItem>
+         
           </NavbarContent>
 
           <NavbarContent justify="end" className="gap-4">
             {/* Nuevo botón de matches */}
             <Tooltip content="Ver tus matches">
-              <Badge content={newMatches} color="danger" isInvisible={newMatches === 0} shape="circle" size="sm">
+              <Badge content={newMatches} color="danger"  shape="circle" size="sm">
                 <Button
                   isIconOnly
                   variant="light"
                   aria-label="Ver matches"
                   className="text-default-500 hover:text-primary"
-                  onPress={() => router.push("/people-matches")}
+                  onPress={() => router.push("/chat")}
                 >
-                  <MatchesIcon size={24} />
+                  <ChatBubbleIcon size={24} />
                 </Button>
               </Badge>
             </Tooltip>
 
-            <Dropdown>
+            <Dropdown className="bg-[var(--dropdown)]">
               <DropdownTrigger>
                 <Avatar
                   as="button"
@@ -229,6 +219,12 @@ export const Navbar = () => {
                   <ProfileIcon size={18} className="mr-2" />
                   <Link href="/settings/profile" className="w-full">
                     Perfil
+                  </Link>
+                </DropdownItem>
+                <DropdownItem key="my-matches">
+                  <MatchesIcon size={18} className="mr-2" />
+                  <Link href="/people-matches" className="w-full">
+                    Mis matches
                   </Link>
                 </DropdownItem>
                 <DropdownItem key="configuration">

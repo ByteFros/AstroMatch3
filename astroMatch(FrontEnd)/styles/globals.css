@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+    height: 100%;
+    min-height: 100%;
+    background-color: var(--background) !important;
+  }
+
+/* Variables para el fondo personalizado */
+:root {
+  --background: #f8f7ff;
+  --card: #ffffff;
+  --dropdown: #f3f0ff;
+  --navbar: #a78dda;
+}
+
+.dark {
+  --background: #1e1022;
+  --card: #2d1a38;
+  --dropdown: #3c1f4b;
+  --navbar: #4e2a5e;
+}
+
+/* Asegura que bg-background use la variable */
+.bg-background {
+  background-color: var(--background) !important;
+}

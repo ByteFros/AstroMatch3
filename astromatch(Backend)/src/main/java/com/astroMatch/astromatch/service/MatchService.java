@@ -115,6 +115,7 @@ public class MatchService {
                             .age(user.getAge())
                             .profileImageUrl(user.getProfileImageUrl())
                             .bio(user.getBio())
+                            .zodiacSign(user.getZodiacSign())
                             .compatibility(compatibility)
                             .isMutual(false)
                             .build();
