@@ -5,6 +5,7 @@ import { Button, Avatar, Card, CardBody, CardFooter, CardHeader, Divider } from 
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -17,6 +18,9 @@ export default function ProfilePage() {
     zodiacSign: ""
   })
 
+  const avatarSrc = form.profileImageUrl
+    ? `${API_URL}${form.profileImageUrl}`
+    : "/placeholder.svg";
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (!token) return
@@ -84,7 +88,11 @@ export default function ProfilePage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex flex-col items-center space-y-2">
-                <Avatar src={form.profileImageUrl || "/placeholder.svg?height=96&width=96"} className="w-24 h-24" alt="Avatar del usuario" />
+                <Avatar
+                  src={avatarSrc}
+                  className="w-24 h-24"
+                  alt="Avatar del usuario"
+                />
                 <Button variant="bordered" size="sm">
                   Cambiar foto
                 </Button>
