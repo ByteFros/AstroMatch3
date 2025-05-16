@@ -18,10 +18,12 @@ public class UserMatchDTO {
     private int age;
     private String profileImageUrl;
     private String bio;
+    private String zodiacSign;
     private int compatibility;
     private boolean isMutual;
     private LocalDateTime lastActive;
     private boolean isOnline;
+
 
 
 }

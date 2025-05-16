@@ -156,13 +156,12 @@ public class MatchService {
     public List<UserMatchDTO> getAllLikedUsers(UserModel user) {
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
+        // Esta es la única instancia de Set, compartida a lo largo del stream:
+        Set<Long> seenUserIds = new HashSet<>();
+
         return matchRepository.findByUser1(user).stream()
-                // solo el primer like de cada user2
-                .filter(match -> {
-                    return new HashSet<Long>() {{
-                        add(match.getUser2().getId());
-                    }}.add(match.getUser2().getId());
-                })
+                // sólo deja pasar la primera ocurrencia de cada user2
+                .filter(match -> seenUserIds.add(match.getUser2().getId()))
                 .map(match -> {
                     UserModel likedUser = match.getUser2();
                     int compatibility = zodiacService
@@ -183,6 +182,7 @@ public class MatchService {
                             .age(likedUser.getAge())
                             .profileImageUrl(likedUser.getProfileImageUrl())
                             .bio(likedUser.getBio())
+                            .zodiacSign(likedUser.getZodiacSign())     // recuerda mapear este campo
                             .compatibility(compatibility)
                             .isMutual(isMutual)
                             .lastActive(lastActive)

@@ -1,6 +1,5 @@
 package com.astroMatch.astromatch.service;
 
-import com.astroMatch.astromatch.dto.UserDTO;
 import com.astroMatch.astromatch.model.Role;
 import com.astroMatch.astromatch.model.UserModel;
 import com.astroMatch.astromatch.repository.UserRepository;
@@ -24,8 +23,8 @@ public class UserService {
 
     }
 
-    public UserDTO toUserDTO(UserModel u) {
-        UserDTO dto = new UserDTO();
+    public com.astroMatch.astromatch.dto.UserDTO toUserDTO(UserModel u) {
+        com.astroMatch.astromatch.dto.UserDTO dto = new com.astroMatch.astromatch.dto.UserDTO();
         dto.setId(u.getId());
         dto.setUsername(u.getUsername());
         dto.setProfileImageUrl(u.getProfileImageUrl());
