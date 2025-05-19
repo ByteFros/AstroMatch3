@@ -44,11 +44,8 @@ export const Navbar = () => {
   // Check authentication status on component mount
   useEffect(() => {
     const verifyAuth = async () => {
-      // First check local storage
       const hasLocalAuth = checkAuth()
-
       if (hasLocalAuth) {
-        // Verify with server
         try {
           const token = localStorage.getItem("token")
           const response = await fetch("http://localhost:8080/api/auth/isLoggedIn", {
@@ -57,23 +54,19 @@ export const Navbar = () => {
               Authorization: `Bearer ${token}`,
             },
           })
-
           const data = await response.json()
           if (!data.isLoggedIn) {
-            // If server says not logged in, but we have local token, logout
             logout()
           } else {
-            // Fetch user profile data
-            await fetchUserProfile()
+            // Llama a fetchUserProfile pero no esperes a que termine para quitar el loading
+            fetchUserProfile()
           }
         } catch (error) {
           console.error("Error verifying auth status:", error)
         }
       }
-
-      setLoading(false)
+      setLoading(false) // Quita el loading aunque el perfil aún no esté
     }
-
     verifyAuth()
   }, [checkAuth, logout])
 
@@ -155,7 +148,7 @@ export const Navbar = () => {
     // Construct the full avatar URL
     const avatarUrl = userProfile?.profileImageUrl 
       ? `${API_URL}${userProfile.profileImageUrl}` 
-      : "/placeholder.svg?height=32&width=32";
+      : "";
 
     return (
       <>
@@ -215,23 +208,17 @@ export const Navbar = () => {
                     <p className="text-xs text-gray-500">{userProfile?.email || "usuario@ejemplo.com"}</p>
                   </div>
                 </DropdownItem>
-                <DropdownItem key="profile">
+                <DropdownItem key="profile" onClick={() => router.push("/settings/profile")}>
                   <ProfileIcon size={18} className="mr-2" />
-                  <Link href="/settings/profile" className="w-full">
-                    Perfil
-                  </Link>
+                  <span className="w-full">Perfil</span>
                 </DropdownItem>
-                <DropdownItem key="my-matches">
+                <DropdownItem key="my-matches" onClick={() => router.push("/people-matches")}>
                   <MatchesIcon size={18} className="mr-2" />
-                  <Link href="/people-matches" className="w-full">
-                    Mis matches
-                  </Link>
+                  <span className="w-full">Mis matches</span>
                 </DropdownItem>
-                <DropdownItem key="configuration">
+                <DropdownItem key="configuration" onClick={() => router.push("/settings/configuration")}>
                   <ConfigIcon size={18} className="mr-2" />
-                  <Link href="/settings/configuration" className="w-full">
-                    Configuración
-                  </Link>
+                  <span className="w-full">Configuración</span>
                 </DropdownItem>
                 <DropdownItem key="logout" onClick={handleLogout}>
                   <LogoutIcon size={18} className="mr-2" />

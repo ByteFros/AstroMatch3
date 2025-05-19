@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
   const avatarSrc = form.profileImageUrl
     ? `${API_URL}${form.profileImageUrl}`
-    : "/placeholder.svg";
+    : "";
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (!token) return
