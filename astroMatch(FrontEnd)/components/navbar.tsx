@@ -57,18 +57,18 @@ export const Navbar = () => {
           const data = await response.json()
           if (!data.isLoggedIn) {
             logout()
+            setUserProfile(null)
           } else {
-            // Llama a fetchUserProfile pero no esperes a que termine para quitar el loading
             fetchUserProfile()
           }
         } catch (error) {
           console.error("Error verifying auth status:", error)
         }
       }
-      setLoading(false) // Quita el loading aunque el perfil aún no esté
+      setLoading(false)
     }
     verifyAuth()
-  }, [checkAuth, logout])
+  }, [checkAuth, logout, isLoggedIn]) // Siempre 3 dependencias, nunca cambian de orden ni cantidad
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
@@ -97,6 +97,7 @@ export const Navbar = () => {
 
   const handleLogout = () => {
     logout()
+    setUserProfile(null) // Limpia el perfil al cerrar sesión
     router.push("/")
   }
 
@@ -114,22 +115,17 @@ export const Navbar = () => {
             </p>
           </NavbarBrand>
           <NavbarContent className="hidden sm:flex gap-4" justify="center">
-            <NavbarItem>
-              <Link href="#">About us</Link>
-            </NavbarItem>
-            <NavbarItem>
-              <Link href="#">Astral Card</Link>
-            </NavbarItem>
+      
           </NavbarContent>
           <NavbarContent justify="end">
             <NavbarItem className="hidden lg:flex">
               <Button onPress={openLogin} color="secondary" >
-                Login
+                Inicar sesión
               </Button>
             </NavbarItem>
             <NavbarItem className="hidden lg:flex">
               <Button onPress={openRegister} color="primary" >
-                Register
+                Registrarse
               </Button>
             </NavbarItem>
           </NavbarContent>
@@ -177,9 +173,9 @@ export const Navbar = () => {
           </NavbarContent>
 
           <NavbarContent justify="end" className="gap-4">
-            {/* Nuevo botón de matches */}
+         
             <Tooltip content="Ver tus matches">
-              <Badge content={newMatches} color="danger"  shape="circle" size="sm">
+              
                 <Button
                   isIconOnly
                   variant="light"
@@ -189,7 +185,7 @@ export const Navbar = () => {
                 >
                   <ChatBubbleIcon size={24} />
                 </Button>
-              </Badge>
+              
             </Tooltip>
 
             <Dropdown className="bg-[var(--dropdown)]">

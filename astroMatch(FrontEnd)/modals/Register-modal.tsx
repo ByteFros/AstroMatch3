@@ -119,34 +119,39 @@ export default function RegisterModal() {
   return (
     <Modal isOpen={isRegisterOpen} size="sm" placement="top-center" onOpenChange={closeRegister}>
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">Register</ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">Registro</ModalHeader>
         <div className="px-4">
           <ModalBody>
             {/* Inputs de registro */}
             <Input
               name="username"
-              label="User"
-              placeholder="Enter your User"
+              label="Usuario"
+              placeholder="Introduce tu usuario"
               variant="bordered"
               onChange={handleChange}
             />
             <Input
               name="password"
-              label="Password"
-              placeholder="Enter your Password"
+              label="Contraseña"
+              placeholder="Introduce tu contraseña"
               type="password"
               variant="bordered"
               onChange={handleChange}
             />
-            <Input name="email" label="Mail" placeholder="Enter your mail" variant="bordered" onChange={handleChange} />
-            {/* <Input label="Name" placeholder="Enter your Name" variant="bordered" /> */}
+            <Input
+              name="email"
+              label="Correo electrónico"
+              placeholder="Introduce tu correo"
+              variant="bordered"
+              onChange={handleChange}
+            />
 
             {/* Edad y Horóscopo en la misma línea */}
             <div className="flex gap-4">
               <Input
                 name="age"
-                label="Age"
-                placeholder="Enter your age"
+                label="Edad"
+                placeholder="Introduce tu edad"
                 type="number"
                 variant="bordered"
                 onChange={handleChange}
@@ -154,7 +159,7 @@ export default function RegisterModal() {
               <Select
                 name="zodiacSign"
                 className="max-w-xs"
-                label="Select Horoscope"
+                label="Selecciona tu horóscopo"
                 onSelectionChange={(value) => handleSelectChange("zodiacSign", Array.from(value)[0] as string)}
               >
                 {horoscopos.map((horoscopo) => (
@@ -164,19 +169,24 @@ export default function RegisterModal() {
             </div>
 
             <div className="flex gap-4">
-              <Select name="gender" className="max-w-xs" label="What is your gender?" onChange={handleChange}>
+              <Select
+                name="gender"
+                className="max-w-xs"
+                label="¿Cuál es tu género?"
+                onChange={handleChange}
+              >
                 {generos.map((genero) => (
-                  <SelectItem key={genero.key}>{genero.key}</SelectItem>
+                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
                 ))}
               </Select>
               <Select
                 name="preferredGender"
                 className="max-w-xs"
-                label="What gender do you like?"
+                label="¿Qué género te gusta?"
                 onChange={handleChange}
               >
                 {generos.map((genero) => (
-                  <SelectItem key={genero.key}>{genero.key}</SelectItem>
+                  <SelectItem key={genero.key}>{genero.label}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -185,17 +195,17 @@ export default function RegisterModal() {
             <div className="py-4 flex flex-col items-end">
               {selectedFileName && <p className="text-xs text-gray-600">Archivo seleccionado: {selectedFileName}</p>}
               <Button color="primary" as="label">
-                Upload Image
+                Subir imagen
                 <input type="file" hidden ref={imageRef} accept="image/*" onChange={handleFileChange} />
               </Button>
             </div>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="flat" onPress={closeRegister}>
-              Close
+              Cerrar
             </Button>
             <Button color="primary" onPress={handleRegister}>
-              Sign up
+              Registrarse
             </Button>
           </ModalFooter>
         </div>

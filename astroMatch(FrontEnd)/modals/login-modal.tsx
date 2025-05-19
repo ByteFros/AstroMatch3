@@ -52,19 +52,19 @@ export default function LoginModal() {
     <Modal isOpen={isLoginOpen} size="sm" placement="top-center" onOpenChange={closeLogin}>
       <ModalContent>
         <div className="px-5">
-          <ModalHeader className="flex flex-col gap-1">Log in</ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">Iniciar sesión</ModalHeader>
           <ModalBody>
             <Input
               name="username"
-              label="Username"
-              placeholder="Enter your username"
+              label="Usuario"
+              placeholder="Introduce tu usuario"
               variant="bordered"
               onChange={handleChange}
             />
             <Input
               name="password"
-              label="Password"
-              placeholder="Enter your password"
+              label="Contraseña"
+              placeholder="Introduce tu contraseña"
               type="password"
               variant="bordered"
               onChange={handleChange}
@@ -73,18 +73,18 @@ export default function LoginModal() {
             {errorMessage && <p className="text-red-500 text-xs mt-2">{errorMessage}</p>}
 
             <div className="flex py-2 px-1 justify-between">
-              <Checkbox classNames={{ label: "text-small" }}>Remember me</Checkbox>
+              <Checkbox classNames={{ label: "text-small" }}>Recuérdame</Checkbox>
               <Link color="primary" href="#" size="sm">
-                Forgot password?
+                ¿Olvidaste tu contraseña?
               </Link>
             </div>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="flat" onPress={closeLogin}>
-              Close
+              Cerrar
             </Button>
             <Button color="primary" onClick={handleLogin}>
-              Sign in
+              Iniciar sesión
             </Button>
           </ModalFooter>
         </div>
