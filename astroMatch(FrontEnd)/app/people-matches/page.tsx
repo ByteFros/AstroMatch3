@@ -89,7 +89,7 @@ export default function UnifiedMatchesPage() {
               </div>
             </div>
             <div className="p-4">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold">  
                 {match.username}, {match.age}
               </h2>
               <p className="text-sm text-gray-500">{match.bio}</p>

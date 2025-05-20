@@ -32,6 +32,14 @@ interface Conversation {
   unreadCount: number
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+const getAvatarUrl = (url?: string) => {
+  if (!url || url.trim() === "") return "/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `${API_URL}${url.startsWith("/") ? url : "/" + url}`;
+};
+
 export default function ChatPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -43,7 +51,6 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -100,7 +107,7 @@ export default function ChatPage() {
       user: {
         id: user.id.toString(),
         username: user.username,
-        profileImageUrl: `${API_URL}${user.profileImageUrl}`,
+        profileImageUrl: getAvatarUrl(user.profileImageUrl),
         isOnline: user.online,
         lastActive: user.lastActive
         ? new Date(user.lastActive).toLocaleString([], {

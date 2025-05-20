@@ -87,4 +87,10 @@ public class UserController {
 
         return ResponseEntity.ok(formattedUsers);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserModel> getUserById(@PathVariable Long id) {
+        Optional<UserModel> user = userRepository.findById(id);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

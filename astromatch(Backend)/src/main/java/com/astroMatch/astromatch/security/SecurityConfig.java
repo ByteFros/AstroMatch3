@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Permitir login y registro
                         .requestMatchers("/uploads/**").permitAll() // Permitir acceso a imágenes
                         .requestMatchers("/api/matches/**").authenticated() // Permitir acceso a matches
-                        .requestMatchers("/api/users/**").authenticated() // Permitir acceso a usuarios
+                        .requestMatchers("/api/users/**").permitAll() // Permitir acceso a usuarios
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // 🔥 AGREGAR EL FILTRO JWT
